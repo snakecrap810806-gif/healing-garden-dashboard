@@ -1,361 +1,357 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"/>
-<title>디지털 치유정원·실시간 정원 환경 대시보드</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-  :root{
-    --bg:#f7fbfd;
-    --card:#ffffff;
-    --text:#102a43;
-    --muted:#6b7c93;
-    --good:#14b97a;
-    --warn:#f59f00;
-    --bad:#e03131;
-    --shadow:0 8px 28px rgba(16,42,67,.08);
-    --ring:0 0 0 8px rgba(20,185,122,.15);
-    --accent:#0ea5e9;
-  }
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:"Pretendard",system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    -webkit-tap-highlight-color:transparent;
-    touch-action:manipulation; /* 모바일 탭 지연/제스처 최소화 */
-  }
-  .wrap{max-width:1200px;margin:32px auto;padding:0 16px}
-  header{
-    display:flex; align-items:center; gap:12px; justify-content:space-between; margin-bottom:16px;
-  }
-  .title{
-    font-size:clamp(20px,3.6vw,40px); font-weight:800; letter-spacing:-.02em;
-  }
-  .meta{
-    font-size:14px; color:var(--muted);
-  }
-  .toolbar{display:flex; gap:8px; align-items:center}
-  .btn{
-    border:0; background:#e6f6ff; color:var(--accent); font-weight:700;
-    padding:10px 14px; border-radius:10px; cursor:pointer;
-  }
-  .grid{
-    display:grid; gap:18px; grid-template-columns:repeat(12,1fr);
-  }
-  .card{
-    grid-column:span 12;
-    background:var(--card); border-radius:18px; padding:18px 18px 14px;
-    box-shadow:var(--shadow);
-    display:flex; align-items:center; justify-content:space-between; cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  }
-  .card:active{transform:translateY(1px)}
-  .card:focus-visible{outline:none; box-shadow:var(--shadow), var(--ring)}
-  @media(min-width:640px){ .card{grid-column:span 6} }
-  @media(min-width:980px){ .card{grid-column:span 3} }
-  .left{display:flex; gap:12px; align-items:center}
-  .icon{
-    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
-    background:#f2f7fb;font-size:22px
-  }
-  .label{font-weight:800; letter-spacing:-.02em}
-  .value{font-size:28px; font-weight:800}
-  .unit{margin-left:4px; font-size:14px; color:var(--muted); font-weight:700}
-  .state{
-    padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px;
-  }
-  .good{background:rgba(20,185,122,.12); color:var(--good)}
-  .warn{background:rgba(245,159,0,.14); color:var(--warn)}
-  .bad{ background:rgba(224,49,49,.14); color:var(--bad) }
-  /* summary bar */
-  .summary{
-    margin-top:14px; background:var(--card); border-radius:16px;
-    padding:12px 16px; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px;
-  }
-  .dot{width:10px;height:10px;border-radius:999px;background:var(--good)}
-  /* modal */
-  .modal{
-    position:fixed; inset:0; background:rgba(0,0,0,.4);
-    display:none; align-items:flex-end; justify-content:center; z-index:50;
-  }
-  .sheet{
-    width:min(1080px,94vw); height:64vh; background:var(--card);
-    border-radius:22px 22px 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.12);
-    padding:14px 14px 10px; display:flex; flex-direction:column; gap:8px;
-  }
-  .sheet-head{display:flex; justify-content:space-between; align-items:center}
-  .sheet-title{font-weight:800; letter-spacing:-.02em}
-  .close{border:0;background:#f0f3f7;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .chartbox{position:relative; flex:1; min-height:48vh}
-  canvas{position:absolute; inset:8px; width:calc(100% - 16px)!important; height:calc(100% - 16px)!important}
-  /* helps iframe hosts like MP Skin */
-  .clickable{pointer-events:auto}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>디지털 치유정원·실시간 정원 환경 대시보드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg: #f6fbff;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --ok:#0ea5e9;
+      --good:#16a34a;
+      --bad:#ef4444;
+      --ring:#e2e8f0;
+      --primary:#2563eb;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{
+      font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink);
+      background: radial-gradient(1200px 600px at 80% -20%, #e8f2ff 0%, transparent 60%) var(--bg);
+      background-attachment: fixed;
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 48px}
+    header{
+      display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px
+    }
+    .title{
+      font-weight:900;letter-spacing:-0.02em;font-size:clamp(22px,3.2vw,36px)
+    }
+    .subtitle{color:var(--muted);font-size:14px}
+    .time{font-weight:700;color:var(--primary)}
+    .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .btn{
+      appearance:none;border:1px solid var(--ring);background:#fff;padding:10px 14px;border-radius:10px;
+      font-weight:700;cursor:pointer
+    }
+    .btn.primary{background:var(--primary);color:#fff;border-color:transparent}
+    .grid{
+      display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:10px
+    }
+    .card{
+      grid-column:span 6;background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:18px;
+      box-shadow:0 8px 30px rgba(2,6,23,.06);display:flex;align-items:center;gap:14px;cursor:pointer
+    }
+    @media(min-width:900px){.card{grid-column:span 3}}
+    .icon{
+      width:54px;height:54px;border-radius:12px;display:grid;place-items:center;font-size:26px;
+      background:linear-gradient(135deg,#eff6ff,#ecfeff)
+    }
+    .label{font-weight:900;letter-spacing:-0.02em}
+    .value{font-size:26px;font-weight:900}
+    .unit{color:var(--muted);margin-left:6px;font-weight:700}
+    .pill{
+      margin-left:auto;font-size:13px;font-weight:900;border-radius:999px;padding:6px 10px;border:1px solid var(--ring);
+      color:var(--muted);background:#fff
+    }
+    .pill.good{color:#166534;background:#ecfdf5;border-color:#a7f3d0}
+    .pill.warn{color:#a16207;background:#fffbeb;border-color:#fde68a}
+    .pill.bad{color:#991b1b;background:#fef2f2;border-color:#fecaca}
+    .foot{
+      margin-top:18px;background:#ffffffcc;border:1px solid var(--ring);backdrop-filter:blur(4px);
+      border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px
+    }
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--good)}
+    .score{font-weight:900}
+    .logos{margin-left:auto;display:flex;align-items:center;gap:16px;opacity:.9}
+    .logos img{height:26px;object-fit:contain}
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50}
+    .modal.show{display:flex}
+    .backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px)}
+    .sheet{
+      position:relative;width:min(1100px,94vw);height:min(56vh,520px);background:#fff;border-radius:18px;
+      border:1px solid var(--ring);padding:14px 14px 8px;box-shadow:0 24px 80px rgba(2,6,23,.3);z-index:1
+    }
+    .sheet header{margin:0 4px 6px}
+    .close{
+      position:absolute;top:10px;right:10px;border:none;background:#0f172a;color:#fff;border-radius:10px;padding:8px 10px;
+      font-weight:800;cursor:pointer
+    }
+    canvas{border-radius:10px;background:#fbfdff;border:1px solid var(--ring)}
+    /* ensures mobile taps are captured by the iframe area */
+    .sheet, .card, .btn {touch-action:manipulation}
+  </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div>
         <div class="title">디지털 치유정원·실시간 정원 환경 대시보드</div>
-        <div id="clock" class="meta">--</div>
+        <div class="subtitle"><span class="time" id="now">--:--:--</span> · <span id="cycle">30초 간격 업데이트</span></div>
       </div>
       <div class="toolbar">
-        <button id="refreshBtn" class="btn">지금 새로고침</button>
+        <button class="btn" id="btnAll">전체 그래프</button>
+        <button class="btn primary" id="btnRefresh">지금 새로고침</button>
       </div>
     </header>
 
-    <main class="grid clickable" id="cards">
-      <!-- 카드들이 JS로 렌더링됩니다 -->
-    </main>
-
-    <section class="summary clickable" aria-live="polite">
-      <span class="dot" id="dot"></span>
-      <strong id="summary">종합 평가: 계산 중...</strong>
+    <!-- KPI Cards -->
+    <section class="grid" id="cards">
+      <!-- JS가 채움 -->
     </section>
+
+    <!-- Summary / Logos -->
+    <div class="foot">
+      <span class="dot"></span>
+      <span class="score" id="summaryText">종합 평가: 쾌적</span>
+      <div class="logos">
+        <!-- ✅ 여기에 본인 GitHub에 올린 로고 URL로 교체하세요 -->
+        <img src="https://dummyimage.com/240x40/ffffff/9aa2b1&text=%EA%B5%AD%EB%A6%BD%EC%A0%95%EC%9B%90%EB%AC%B8%ED%99%94%EC%9B%90" alt="국립정원문화원 로고">
+        <img src="https://dummyimage.com/120x40/ffffff/0f172a&text=Upbit" alt="Upbit 로고">
+        <img src="https://dummyimage.com/120x40/ffffff/0f172a&text=%EB%91%90%EB%82%98%EB%AC%B4" alt="두나무 로고">
+      </div>
+    </div>
   </div>
 
-  <!-- 모달 -->
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <!-- Chart Modal -->
+  <div class="modal" id="modal">
+    <div class="backdrop" data-close></div>
     <div class="sheet">
-      <div class="sheet-head">
-        <div class="sheet-title" id="modalTitle">시간대 그래프</div>
-        <button class="close" id="closeModal">닫기</button>
-      </div>
-      <div class="chartbox">
-        <canvas id="chart"></canvas>
-      </div>
+      <header>
+        <div class="title" id="modalTitle" style="font-size:18px">그래프</div>
+      </header>
+      <button class="close" data-close>닫기</button>
+      <canvas id="chart"></canvas>
     </div>
   </div>
 
 <script>
 /* -----------------------------
-   데이터/상태 로직
------------------------------ */
-const THRESHOLDS = {
-  PM10: 100,      // ㎍/㎥
-  PM25: 50,       // ㎍/㎥
-  CO2:  1000      // ppm
+   0) 설정 (필요 시 숫자만 고치세요)
+--------------------------------*/
+const UPDATE_MS = 30_000;          // 30초 주기
+const HISTORY_LEN = 120;           // 최대 120개 포인트(약 1시간)
+const limits = {
+  pm10: 100,       // µg/m³
+  pm25: 50,        // µg/m³
+  co2: 1000,       // ppm
+  temp: {min: -10, max: 40, good:[18,27]},
+  humi: {min: 10, max: 90, good:[35,65]}
+};
+// 기본 중심값(가을 느낌, 아주 조금만 출렁)
+const base = {
+  pm10: 26,   // µg/m³
+  pm25: 13,   // µg/m³
+  co2: 430,   // ppm
+  temp: 18.6, // ℃
+  humi: 55.0  // %RH
+};
+// y축 범위(그래프를 완만하게)
+const yRanges = {
+  pm10: [0, 140],
+  pm25: [0, 80],
+  co2 : [300, 1200],
+  temp: [ -5, 35],
+  humi: [ 20, 90]
+};
+// 항목 메타
+const METAS = {
+  pm10: {label:'PM10', unit:'µg/m³', icon:'🌫️'},
+  pm25: {label:'PM2.5', unit:'µg/m³', icon:'🏙️'},
+  co2 : {label:'CO₂', unit:'ppm', icon:'🫁'},
+  temp: {label:'온도', unit:'℃', icon:'🌡️'},
+  humi: {label:'습도', unit:'%RH', icon:'💧'},
 };
 
-const UNITS = { PM10:'㎍/㎥', PM25:'㎍/㎥', CO2:'ppm', TEMP:'℃', HUM:'%RH' };
-const LABELS = { PM10:'PM10', PM25:'PM2.5', CO2:'CO₂', TEMP:'온도', HUM:'습도' };
-const ICONS  = { PM10:'☁️', PM25:'🏙️', CO2:'🫁', TEMP:'🌡️', HUM:'💧' };
-
-// 시작 값(가을 느낌)
-let cur = { PM10: 28, PM25: 15, CO2: 520, TEMP: 18.5, HUM: 55 };
-
-const historyMap = {
-  PM10:[], PM25:[], CO2:[], TEMP:[], HUM:[]
+/* -----------------------------
+   1) 상태
+--------------------------------*/
+const state = {
+  now: new Date(),
+  data: {...base},
+  history: {
+    pm10:[], pm25:[], co2:[], temp:[], humi:[], time:[]
+  }
 };
-const MAX_POINTS = 60; // 약 한 시간치(분 단위라 가정)
 
-/* 작은 변화 + 드문 스파이크 */
-function nextValue(key, now){
-  const v = cur[key];
-  let delta = 0;
-  switch(key){
-    case 'PM10': delta = rand(-1.2, 1.4); break;
-    case 'PM25': delta = rand(-0.8, 1.0); break;
-    case 'CO2' : delta = rand(-10, 14); break;
-    case 'TEMP': delta = rand(-0.05, 0.06); break;
-    case 'HUM' : delta = rand(-0.6, 0.8); break;
+/* -----------------------------
+   2) 도우미
+--------------------------------*/
+const $ = sel => document.querySelector(sel);
+const fmt = n => {
+  // 소수 한 자리(온도/습도), 나머지는 한 자리(미세먼지), CO2는 정수
+  if (Number.isNaN(n)) return '-';
+  return Math.round(n * 10) / 10;
+};
+const prettyTime = d => d.toLocaleString('ko-KR', {year:'numeric',month:'numeric',day:'numeric',
+                                                   hour:'numeric',minute:'2-digit',second:'2-digit'});
+
+function statusFor(key,val){
+  if (key==='pm10') return val<=limits.pm10 ? '좋음' : '위험';
+  if (key==='pm25') return val<=limits.pm25 ? '좋음' : '위험';
+  if (key==='co2')  return val<=limits.co2  ? '좋음' : '위험';
+  if (key==='temp'){
+    const [a,b]=limits.temp.good; return (val>=a && val<=b)?'좋음':'주의';
   }
-  let spikeChance = 0.05; // 5%만 경고 스파이크
-  let val = v + delta;
-  if(Math.random() < spikeChance){
-    if(key==='PM10') val += rand(25, 45);
-    if(key==='PM25') val += rand(12, 25);
-    if(key==='CO2')  val += rand(120, 260);
+  if (key==='humi'){
+    const [a,b]=limits.humi.good; return (val>=a && val<=b)?'좋음':'주의';
   }
-  // 안전 클램프
-  if(key==='PM10') val = clamp(val, 8, 135);
-  if(key==='PM25') val = clamp(val, 5, 80);
-  if(key==='CO2')  val = clamp(val, 380, 1400);
-  if(key==='TEMP') val = clamp(val, 10, 28);
-  if(key==='HUM')  val = clamp(val, 30, 85);
-  cur[key] = round(val, (key==='TEMP')?1:1);
-  pushHistory(key, now, cur[key]);
+  return '정보';
+}
+function pillClass(txt){
+  if (txt==='좋음') return 'good';
+  if (txt==='위험') return 'bad';
+  return 'warn';
 }
 
-function pushHistory(key, now, value){
-  const arr = historyMap[key];
-  arr.push({ t: now, v: value });
-  if(arr.length > MAX_POINTS) arr.shift();
+// 값 랜덤 워크 (아주 작은 변화)
+function jitter(current, step=0.35){
+  return current + (Math.random()-0.5)*step;
+}
+function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+function nextValues(prev){
+  // 미세먼지는 아주 미세하게 변동, 가끔 아주 희미한 스파이크
+  const spike = Math.random()<0.08 ? (Math.random()*2.5) : 0; // 8% 확률로 +최대 2.5
+  const pm10 = Math.max(2, jitter(prev.pm10, 0.6) + spike);
+  const pm25 = Math.max(1, jitter(prev.pm25, 0.4) + spike*0.6);
+  // CO2는 실내 기준 완만
+  const co2  = clamp(jitter(prev.co2, 6), 350, 1100);
+  // 온도/습도는 고정 범위에서 매우 완만
+  const temp = clamp(jitter(prev.temp, 0.12), limits.temp.min, limits.temp.max);
+  const humi = clamp(jitter(prev.humi, 0.5), limits.humi.min, limits.humi.max);
+  return {pm10, pm25, co2, temp, humi};
 }
 
-function stateOf(key, value){
-  if(key==='CO2'){
-    if(value <= THRESHOLDS.CO2) return { cls:'good', txt:'좋음' };
-    else return { cls:'bad', txt:'위험' };
-  }else if(key==='PM10'){
-    if(value <= THRESHOLDS.PM10) return { cls:'good', txt:'좋음' };
-    else return { cls:'bad', txt:'위험' };
-  }else if(key==='PM25'){
-    if(value <= THRESHOLDS.PM25) return { cls:'good', txt:'좋음' };
-    else return { cls:'bad', txt:'위험' };
-  }else{
-    // TEMP/HUM 상태는 참고용(항상 '좋음')
-    return { cls:'good', txt:'양호' };
-  }
-}
-
-function summaryText(){
-  const s = ['PM10','PM25','CO2'].map(k=>stateOf(k,cur[k]).cls);
-  const badCnt = s.filter(x=>x==='bad').length;
-  if(badCnt===0) return { text:'종합 평가: 쾌적', color:'var(--good)' };
-  if(badCnt===1) return { text:'종합 평가: 보통', color:'var(--warn)' };
-  return { text:'종합 평가: 주의', color:'var(--bad)' };
+function pushHistory(){
+  const t = new Date();
+  state.history.time.push(t);
+  ['pm10','pm25','co2','temp','humi'].forEach(k=>{
+    state.history[k].push(state.data[k]);
+    if (state.history[k].length > HISTORY_LEN) state.history[k].shift();
+  });
+  if (state.history.time.length > HISTORY_LEN) state.history.time.shift();
 }
 
 /* -----------------------------
-   렌더링
------------------------------ */
-const cardsEl = document.getElementById('cards');
-const clockEl = document.getElementById('clock');
-const dotEl = document.getElementById('dot');
-const sumEl = document.getElementById('summary');
-
-const FIELDS = ['PM10','PM25','CO2','TEMP','HUM'];
+   3) 렌더링
+--------------------------------*/
+function renderTime(){
+  state.now = new Date();
+  $('#now').textContent = prettyTime(state.now);
+}
 
 function renderCards(){
-  cardsEl.innerHTML = '';
-  FIELDS.forEach(key=>{
-    const val = cur[key];
-    const st  = stateOf(key,val);
+  const container = $('#cards');
+  container.innerHTML = '';
+  const order = ['pm10','pm25','temp','humi']; // 화면 4개 카드
+  order.forEach(key=>{
+    const meta = METAS[key];
+    const val = state.data[key];
+    const status = statusFor(key,val);
     const card = document.createElement('button');
-    card.className='card';
-    card.setAttribute('type','button');
-    card.setAttribute('data-key',key);
+    card.className = 'card';
+    card.setAttribute('data-key', key);
     card.innerHTML = `
-      <div class="left">
-        <div class="icon">${ICONS[key]}</div>
-        <div>
-          <div class="label">${LABELS[key]}</div>
-          <div class="value">${val}<span class="unit">${UNITS[key]||''}</span></div>
-        </div>
+      <div class="icon" aria-hidden="true">${meta.icon}</div>
+      <div style="text-align:left">
+        <div class="label">${meta.label}</div>
+        <div class="value">${key==='co2' ? Math.round(val) : fmt(val)} <span class="unit">${meta.unit}</span></div>
       </div>
-      <div class="state ${st.cls}">${st.txt}</div>
+      <div class="pill ${pillClass(status)}">${status}</div>
     `;
-    // 클릭 + 터치 지원
-    bindTap(card, () => openChart(key));
-    cardsEl.appendChild(card);
+    card.addEventListener('click', ()=> openChart(key));
+    container.appendChild(card);
   });
-}
 
-function renderClock(){
-  const now = new Date();
-  const fmt = now.toLocaleString('ko-KR', { year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit' });
-  clockEl.textContent = `${fmt} · 30초 간격 업데이트`;
-}
-
-function renderSummary(){
-  const s = summaryText();
-  sumEl.textContent = s.text;
-  dotEl.style.background = s.color;
+  // 종합평가
+  const ok = (state.data.pm10<=limits.pm10) && (state.data.pm25<=limits.pm25) && (state.data.co2<=limits.co2)
+            && (state.data.temp>=limits.temp.good[0] && state.data.temp<=limits.temp.good[1])
+            && (state.data.humi>=limits.humi.good[0] && state.data.humi<=limits.humi.good[1]);
+  $('#summaryText').textContent = `종합 평가: ${ok?'쾌적':'보통/주의'}`;
 }
 
 /* -----------------------------
-   차트 모달
------------------------------ */
-const modal = document.getElementById('modal');
-const modalTitle = document.getElementById('modalTitle');
-const closeBtn = document.getElementById('closeModal');
+   4) 차트
+--------------------------------*/
 let chart;
-
-function openChart(key){
-  // PM10/PM2.5/CO2만 그래프 (TEMP/HUM은 선택적)
-  modal.style.display='flex';
-  modalTitle.textContent = `${LABELS[key]} 시간대별 측정값`;
-  if(chart){ chart.destroy(); chart=null; }
-  const ctx = document.getElementById('chart').getContext('2d');
-  const labels = historyMap[key].map(p=>new Date(p.t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));
-  const data   = historyMap[key].map(p=>p.v);
-
-  // 완만한 곡선을 위해 y축 여유폭 크게
-  const maxY = Math.max(...data, (key==='PM10')?140:(key==='PM25')?80:(key==='CO2')?1400:100);
+function buildChart(){
+  const ctx = $('#chart').getContext('2d');
   chart = new Chart(ctx,{
     type:'line',
-    data:{ labels, datasets:[{
-      label:`${LABELS[key]} 시간대별 측정값`,
-      data,
-      fill:true,
-      borderColor:'#10a6d1',
-      backgroundColor:'rgba(16,166,209,.12)',
-      tension:.35,
-      pointRadius:2
-    }]},
+    data:{ labels:[], datasets:[{label:'', data:[], fill:true, tension:.25}]},
     options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{ intersect:false, mode:'index' },
+      maintainAspectRatio:false,
+      responsive:true,
+      interaction:{mode:'nearest',intersect:false},
       scales:{
-        y:{
-          suggestedMin:0,
-          suggestedMax:maxY,
-          ticks:{ font:{ weight:700 } }
-        },
-        x:{ ticks:{ maxRotation:0, autoSkip:true, font:{ weight:700 } } }
+        x:{grid:{color:'rgba(148,163,184,.25)'}, ticks:{maxRotation:0,autoSkip:true}},
+        y:{grid:{color:'rgba(148,163,184,.20)'}, ticks:{precision:0}}
       },
-      plugins:{ legend:{ display:false } }
+      plugins:{
+        legend:{display:false},
+        tooltip:{mode:'index',intersect:false}
+      }
     }
   });
 }
-function closeChart(){ modal.style.display='none'; }
-bindTap(closeBtn, closeChart);
-modal.addEventListener('click', (e)=>{ if(e.target===modal) closeChart(); });
+function openChart(key){
+  const meta = METAS[key];
+  $('#modalTitle').textContent = `${meta.label} 시간대별 측정값 (${meta.unit})`;
+  // 데이터 바인딩
+  chart.data.labels = state.history.time.map(t=> t.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));
+  chart.data.datasets[0].label = meta.label;
+  chart.data.datasets[0].data = state.history[key];
+  chart.data.datasets[0].borderColor = 'rgba(14,165,233,1)';
+  chart.data.datasets[0].backgroundColor = 'rgba(14,165,233,.15)';
+  // y 범위
+  const [minY,maxY] = yRanges[key];
+  chart.options.scales.y.min = minY;
+  chart.options.scales.y.max = maxY;
+  chart.update();
+  $('#modal').classList.add('show');
+}
+function closeChart(){ $('#modal').classList.remove('show'); }
 
 /* -----------------------------
-   주기 업데이트
------------------------------ */
-function tick(){
-  const now = Date.now();
-  FIELDS.forEach(k => nextValue(k, now));
-  renderCards(); renderClock(); renderSummary();
+   5) 주기 업데이트
+--------------------------------*/
+function tick(updateHistory=true){
+  state.data = nextValues(state.data);
+  if (updateHistory) pushHistory();
+  renderTime();
+  renderCards();
 }
-document.getElementById('refreshBtn').addEventListener('click', ()=>{ tick(); });
-
-/* 초기가입력 - 히스토리 채우기 */
-(function seed(){
-  const baseNow = Date.now() - MAX_POINTS*60000; // 1분 간격 가정
-  for(let i=0;i<MAX_POINTS;i++){
-    const t = baseNow + i*60000;
-    FIELDS.forEach(k=>{
-      // 아주 작은 변동으로 시드
-      const jitter = (k==='TEMP')? rand(-.08,.08) : (k==='HUM')? rand(-.5,.5) : rand(-1,1);
-      const v = (cur[k]+jitter);
-      historyMap[k].push({ t, v });
-    });
-  }
-  // 시드 후 한 번 렌더
-  renderCards(); renderClock(); renderSummary();
-})();
-
-// 30초마다
-setInterval(tick, 30000);
 
 /* -----------------------------
-   유틸
------------------------------ */
-function rand(min,max){ return Math.random()*(max-min)+min; }
-function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
-function round(n, d=1){ const f=Math.pow(10,d); return Math.round(n*f)/f; }
+   6) 초기화
+--------------------------------*/
+function init(){
+  // 초기 이력 채우기(그래프가 빈 화면이 되지 않도록 20포인트 미리 생성)
+  state.data = {...base};
+  for(let i=0;i<20;i++){ state.data = nextValues(state.data); pushHistory(); }
+  renderTime(); renderCards(); buildChart();
 
-// 모바일 탭/클릭 동시지원(이중 호출 방지)
-function bindTap(el, fn){
-  let locked = false;
-  const handler = (e)=>{ 
-    if(locked) return;
-    locked = true;
-    fn();
-    setTimeout(()=>locked=false, 300);
-  };
-  el.addEventListener('click', handler);
-  el.addEventListener('touchend', (e)=>{ e.preventDefault(); handler(e); }, {passive:false});
+  // 이벤트
+  $('#btnRefresh').addEventListener('click', ()=> tick(true));
+  $('#btnAll').addEventListener('click', ()=> openChart('pm10'));
+  document.querySelectorAll('[data-close]').forEach(el=> el.addEventListener('click', closeChart));
+
+  // 주기
+  setInterval(()=> tick(true), UPDATE_MS);
+  // 시계 1초 갱신
+  setInterval(renderTime, 1000);
 }
+init();
 </script>
 </body>
 </html>
