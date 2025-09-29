@@ -2,367 +2,360 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>디지털 치유정원 · 실시간 정원 환경 대시보드</title>
-
-<!-- 폰트(가독성↑) -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"/>
+<title>디지털 치유정원·실시간 정원 환경 대시보드</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#f6faf9;
-    --panel:#ffffff;
-    --text:#1f2a37;
-    --muted:#6b7280;
-    --good:#089981;
-    --bad:#ef4444;
+    --bg:#f7fbfd;
+    --card:#ffffff;
+    --text:#102a43;
+    --muted:#6b7c93;
+    --good:#14b97a;
+    --warn:#f59f00;
+    --bad:#e03131;
+    --shadow:0 8px 28px rgba(16,42,67,.08);
+    --ring:0 0 0 8px rgba(20,185,122,.15);
     --accent:#0ea5e9;
-    --ring: rgba(14,165,233,.15);
-    --shadow: 0 10px 30px rgba(15,23,42,.06);
   }
-  *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0;
-    font-family:"Noto Sans KR", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-family:"Pretendard",system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    background:var(--bg);
     color:var(--text);
-    background: var(--bg);
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation; /* 모바일 탭 지연/제스처 최소화 */
   }
-
-  /* 상단 헤더 */
-  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 54px}
-  .top{
-    display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
-    margin-bottom:8px;
+  .wrap{max-width:1200px;margin:32px auto;padding:0 16px}
+  header{
+    display:flex; align-items:center; gap:12px; justify-content:space-between; margin-bottom:16px;
   }
   .title{
-    font-size:clamp(22px,3.2vw,36px);
-    font-weight:800; letter-spacing:-.4px;
+    font-size:clamp(20px,3.6vw,40px); font-weight:800; letter-spacing:-.02em;
   }
-  .ts{
-    color:var(--muted); font-weight:600; font-size:14px;
+  .meta{
+    font-size:14px; color:var(--muted);
   }
-
-  /* 로고(원하시면 src만 교체) */
-  .logos{display:flex;align-items:center;gap:22px}
-  .logos img{height:28px;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(0,0,0,.05))}
-  /* ↑ 깃허브에 로고 PNG를 올리신 뒤 ./assets/파일명.png 식으로 교체하세요 */
-
-  /* 카드들 */
+  .toolbar{display:flex; gap:8px; align-items:center}
+  .btn{
+    border:0; background:#e6f6ff; color:var(--accent); font-weight:700;
+    padding:10px 14px; border-radius:10px; cursor:pointer;
+  }
   .grid{
-    display:grid;grid-template-columns:repeat(3,1fr);
-    gap:16px;margin-top:18px;
+    display:grid; gap:18px; grid-template-columns:repeat(12,1fr);
   }
-  @media(max-width:920px){ .grid{grid-template-columns:1fr} }
-
   .card{
-    background:var(--panel); border-radius:20px; box-shadow:var(--shadow);
-    padding:18px 18px 16px; position:relative; overflow:hidden;
-    transition:transform .2s ease, box-shadow .2s ease;
-    border:1px solid rgba(2,6,23,.04);
+    grid-column:span 12;
+    background:var(--card); border-radius:18px; padding:18px 18px 14px;
+    box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
   }
-  .card:focus-within, .card:hover{
-    box-shadow:0 14px 36px rgba(2,6,23,.10);
-    transform:translateY(-2px);
+  .card:active{transform:translateY(1px)}
+  .card:focus-visible{outline:none; box-shadow:var(--shadow), var(--ring)}
+  @media(min-width:640px){ .card{grid-column:span 6} }
+  @media(min-width:980px){ .card{grid-column:span 3} }
+  .left{display:flex; gap:12px; align-items:center}
+  .icon{
+    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+    background:#f2f7fb;font-size:22px
   }
-  .head{display:flex; align-items:center; justify-content:space-between}
-  .label{font-weight:800; letter-spacing:-.3px}
-  .badge{
-    font-size:12px; font-weight:800; padding:6px 10px; border-radius:999px;
-    background:var(--ring); color:var(--accent);
+  .label{font-weight:800; letter-spacing:-.02em}
+  .value{font-size:28px; font-weight:800}
+  .unit{margin-left:4px; font-size:14px; color:var(--muted); font-weight:700}
+  .state{
+    padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px;
   }
-  .value{
-    display:flex; align-items:baseline; gap:8px; margin-top:10px
+  .good{background:rgba(20,185,122,.12); color:var(--good)}
+  .warn{background:rgba(245,159,0,.14); color:var(--warn)}
+  .bad{ background:rgba(224,49,49,.14); color:var(--bad) }
+  /* summary bar */
+  .summary{
+    margin-top:14px; background:var(--card); border-radius:16px;
+    padding:12px 16px; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px;
   }
-  .v{
-    font-size:clamp(28px,4.2vw,40px); font-weight:800; letter-spacing:-.4px
-  }
-  .unit{color:var(--muted); font-weight:700}
-  .state{margin-top:8px; font-weight:800; font-size:14px}
-  .state.good{color:var(--good)} .state.bad{color:var(--bad)}
-
-  .open-graph{
-    margin-top:14px; width:100%;
-    border:0; border-radius:12px; padding:12px 14px;
-    font-weight:800; background:#eef6ff; color:#0369a1;
-    cursor:pointer
-  }
-  .open-graph:active{transform:translateY(1px)}
-
-  /* 모달 */
+  .dot{width:10px;height:10px;border-radius:999px;background:var(--good)}
+  /* modal */
   .modal{
-    position:fixed; inset:0; display:none; place-items:center;
-    background:rgba(2,6,23,.5); z-index:50; padding:20px;
+    position:fixed; inset:0; background:rgba(0,0,0,.4);
+    display:none; align-items:flex-end; justify-content:center; z-index:50;
   }
-  .modal.show{display:grid}
-  .modal-panel{
-    background:var(--panel); border-radius:18px; width:min(100%, 1100px);
-    height:min(74vh, 620px); box-shadow:var(--shadow); position:relative;
-    padding:16px 16px 12px;
+  .sheet{
+    width:min(1080px,94vw); height:64vh; background:var(--card);
+    border-radius:22px 22px 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.12);
+    padding:14px 14px 10px; display:flex; flex-direction:column; gap:8px;
   }
-  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-  .modal-title{font-weight:800}
-  .close{
-    border:0;background:#f1f5f9;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer
-  }
-
-  /* 차트 캔버스 - 모바일 터치/탭 최적화 */
-  canvas{touch-action: manipulation; -webkit-tap-highlight-color: transparent;}
-
-  /* 하단 컨트롤 */
-  .bottom{
-    margin-top:22px; display:flex; gap:10px; align-items:center; flex-wrap:wrap
-  }
-  .pill{border:0;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer}
-  .pill.secondary{background:#0ea5e9}
+  .sheet-head{display:flex; justify-content:space-between; align-items:center}
+  .sheet-title{font-weight:800; letter-spacing:-.02em}
+  .close{border:0;background:#f0f3f7;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .chartbox{position:relative; flex:1; min-height:48vh}
+  canvas{position:absolute; inset:8px; width:calc(100% - 16px)!important; height:calc(100% - 16px)!important}
+  /* helps iframe hosts like MP Skin */
+  .clickable{pointer-events:auto}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="top">
+    <header>
       <div>
-        <div class="title">디지털 치유정원 · 실시간 정원 환경 대시보드</div>
-        <div class="ts"><span id="now"></span> · <b>30초 간격 업데이트</b></div>
+        <div class="title">디지털 치유정원·실시간 정원 환경 대시보드</div>
+        <div id="clock" class="meta">--</div>
       </div>
-      <div class="logos">
-        <!-- 필요시 src 교체(깃허브에 이미지 올린 뒤 상대경로 사용) -->
-        <img src="" alt="국립정원문화원 로고(선택사항)" onerror="this.style.display='none'">
-        <img src="" alt="두나무 로고(선택사항)" onerror="this.style.display='none'">
-        <img src="" alt="Upbit 로고(선택사항)" onerror="this.style.display='none'">
+      <div class="toolbar">
+        <button id="refreshBtn" class="btn">지금 새로고침</button>
       </div>
-    </div>
+    </header>
 
-    <div class="grid">
-      <!-- PM10 -->
-      <section class="card" id="card-pm10">
-        <div class="head">
-          <div class="label">PM10</div>
-          <div class="badge">기준 ≤ 100 ㎍/㎥</div>
-        </div>
-        <div class="value">
-          <div class="v" id="v-pm10">--</div><div class="unit">㎍/㎥</div>
-        </div>
-        <div class="state" id="s-pm10">--</div>
-        <button class="open-graph" data-key="pm10">시간별 그래프 보기</button>
-      </section>
+    <main class="grid clickable" id="cards">
+      <!-- 카드들이 JS로 렌더링됩니다 -->
+    </main>
 
-      <!-- PM2.5 -->
-      <section class="card" id="card-pm25">
-        <div class="head">
-          <div class="label">PM2.5</div>
-          <div class="badge">기준 ≤ 50 ㎍/㎥</div>
-        </div>
-        <div class="value">
-          <div class="v" id="v-pm25">--</div><div class="unit">㎍/㎥</div>
-        </div>
-        <div class="state" id="s-pm25">--</div>
-        <button class="open-graph" data-key="pm25">시간별 그래프 보기</button>
-      </section>
-
-      <!-- CO₂ -->
-      <section class="card" id="card-co2">
-        <div class="head">
-          <div class="label">CO₂</div>
-          <div class="badge">기준 ≤ 1,000 ppm</div>
-        </div>
-        <div class="value">
-          <div class="v" id="v-co2">--</div><div class="unit">ppm</div>
-        </div>
-        <div class="state" id="s-co2">--</div>
-        <button class="open-graph" data-key="co2">시간별 그래프 보기</button>
-      </section>
-    </div>
-
-    <div class="bottom">
-      <button id="btn-refresh" class="pill secondary">지금 새로고침</button>
-      <button id="btn-graph-all" class="pill">전체 그래프</button>
-    </div>
+    <section class="summary clickable" aria-live="polite">
+      <span class="dot" id="dot"></span>
+      <strong id="summary">종합 평가: 계산 중...</strong>
+    </section>
   </div>
 
-  <!-- 모달(단일) -->
-  <div class="modal" id="modal">
-    <div class="modal-panel" role="dialog" aria-modal="true">
-      <div class="modal-head">
-        <div class="modal-title" id="modal-title">그래프</div>
-        <button class="close" id="btn-close">닫기</button>
+  <!-- 모달 -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title" id="modalTitle">시간대 그래프</div>
+        <button class="close" id="closeModal">닫기</button>
       </div>
-      <div style="position:relative; width:100%; height:calc(100% - 40px)">
+      <div class="chartbox">
         <canvas id="chart"></canvas>
       </div>
     </div>
   </div>
 
 <script>
-/* ------------------------------ 시간 표시 ------------------------------ */
-function tickTime(){
-  const el = document.getElementById('now');
-  const now = new Date();
-  const f = d => d.toString().padStart(2,'0');
-  el.textContent = `${now.getFullYear()}. ${now.getMonth()+1}. ${now.getDate()}. ${["일","월","화","수","목","금","토"][now.getDay()]} ${now.getHours()}:${f(now.getMinutes())}:${f(now.getSeconds())}`;
-}
-tickTime(); setInterval(tickTime, 1000);
-
-/* ------------------------------ 데이터 모델 ------------------------------ */
-/* 기준: PM10 ≤100, PM2.5 ≤50, CO2 ≤1000 */
-const thresholds = { pm10:100, pm25:50, co2:1000 };
-
-/* 초기값(가을철 실내/외 평균 느낌, 너무 급변하지 않게) */
-let cur = {
-  pm10: 30 + Math.random()*10,    // 30~40
-  pm25: 12 + Math.random()*6,     // 12~18
-  co2 : 430 + Math.random()*80    // 430~510
+/* -----------------------------
+   데이터/상태 로직
+----------------------------- */
+const THRESHOLDS = {
+  PM10: 100,      // ㎍/㎥
+  PM25: 50,       // ㎍/㎥
+  CO2:  1000      // ppm
 };
 
-/* 히스토리 60포인트(최근 30분 가정: 30초 * 60) */
-const MAX = 60;
-const hist = {
-  pm10: Array.from({length:MAX}, ()=> cur.pm10 + (Math.random()*2-1)*2 ),
-  pm25: Array.from({length:MAX}, ()=> cur.pm25 + (Math.random()*2-1)*1.2 ),
-  co2 : Array.from({length:MAX}, ()=> cur.co2  + (Math.random()*2-1)*8 )
+const UNITS = { PM10:'㎍/㎥', PM25:'㎍/㎥', CO2:'ppm', TEMP:'℃', HUM:'%RH' };
+const LABELS = { PM10:'PM10', PM25:'PM2.5', CO2:'CO₂', TEMP:'온도', HUM:'습도' };
+const ICONS  = { PM10:'☁️', PM25:'🏙️', CO2:'🫁', TEMP:'🌡️', HUM:'💧' };
+
+// 시작 값(가을 느낌)
+let cur = { PM10: 28, PM25: 15, CO2: 520, TEMP: 18.5, HUM: 55 };
+
+const historyMap = {
+  PM10:[], PM25:[], CO2:[], TEMP:[], HUM:[]
 };
-const labels = Array.from({length:MAX}, (_,i)=>timeLabel(-MAX+1+i));
+const MAX_POINTS = 60; // 약 한 시간치(분 단위라 가정)
 
-function timeLabel(offset){
-  const t = new Date(Date.now() + offset*30*1000);
-  const two = n => n.toString().padStart(2,'0');
-  return `${two(t.getHours())}:${two(t.getMinutes())}`;
-}
-
-/* 30초마다 아주 작은 변동(약간의 노이즈) + 낮은 확률(3%)로 살짝 스파이크 */
-const RISK_PROB=0.03;
-function nextValue(key, base, noise, spike){
-  let v = cur[key] + (Math.random()*2-1)*noise;
-  if(Math.random()<RISK_PROB){ v += spike * (Math.random()<0.5 ? 1 : -1); }
-  v = Math.max(v, 0);
-  cur[key] = v;
-  return v;
-}
-
-/* ------------------------------ UI 바인딩 ------------------------------ */
-const elV = {
-  pm10: document.getElementById('v-pm10'),
-  pm25: document.getElementById('v-pm25'),
-  co2 : document.getElementById('v-co2')
-};
-const elS = {
-  pm10: document.getElementById('s-pm10'),
-  pm25: document.getElementById('s-pm25'),
-  co2 : document.getElementById('s-co2')
-};
-function fmt(key, v){
-  if(key==='co2') return `${Math.round(v)}`
-  return `${(Math.round(v*10)/10).toFixed(1)}`
-}
-function setState(key, v){
-  const good = v <= thresholds[key];
-  const el = elS[key];
-  el.textContent = good ? '좋음' : '위험';
-  el.className = 'state ' + (good ? 'good':'bad');
-}
-
-/* ------------------------------ 차트 ------------------------------ */
-let chart;
-const baseOptions = {
-  responsive:true,
-  maintainAspectRatio:false,
-  interaction:{ mode:'nearest', intersect:true },
-  /* 모바일 탭/터치 이벤트 명시 */
-  events:['mousemove','mouseout','click','touchstart','touchmove','pointerdown','pointerup'],
-  scales:{
-    x:{ ticks:{ color:'#475569', font:{ weight:700 } }, grid:{ color:'rgba(2,6,23,.06)'} },
-    y:{ ticks:{ color:'#475569', font:{ weight:800 } }, grid:{ color:'rgba(2,6,23,.06)'} }
-  },
-  plugins:{
-    legend:{ display:false },
-    tooltip:{ mode:'nearest', intersect:false }
+/* 작은 변화 + 드문 스파이크 */
+function nextValue(key, now){
+  const v = cur[key];
+  let delta = 0;
+  switch(key){
+    case 'PM10': delta = rand(-1.2, 1.4); break;
+    case 'PM25': delta = rand(-0.8, 1.0); break;
+    case 'CO2' : delta = rand(-10, 14); break;
+    case 'TEMP': delta = rand(-0.05, 0.06); break;
+    case 'HUM' : delta = rand(-0.6, 0.8); break;
   }
-};
-function gradient(ctx, color){
-  const g = ctx.createLinearGradient(0,0,0,400);
-  g.addColorStop(0, color);
-  g.addColorStop(1, 'rgba(14,165,233,0)');
-  return g;
+  let spikeChance = 0.05; // 5%만 경고 스파이크
+  let val = v + delta;
+  if(Math.random() < spikeChance){
+    if(key==='PM10') val += rand(25, 45);
+    if(key==='PM25') val += rand(12, 25);
+    if(key==='CO2')  val += rand(120, 260);
+  }
+  // 안전 클램프
+  if(key==='PM10') val = clamp(val, 8, 135);
+  if(key==='PM25') val = clamp(val, 5, 80);
+  if(key==='CO2')  val = clamp(val, 380, 1400);
+  if(key==='TEMP') val = clamp(val, 10, 28);
+  if(key==='HUM')  val = clamp(val, 30, 85);
+  cur[key] = round(val, (key==='TEMP')?1:1);
+  pushHistory(key, now, cur[key]);
 }
-function openChart(key, title){
-  const modal=document.getElementById('modal'); modal.classList.add('show');
-  document.getElementById('modal-title').textContent = title;
+
+function pushHistory(key, now, value){
+  const arr = historyMap[key];
+  arr.push({ t: now, v: value });
+  if(arr.length > MAX_POINTS) arr.shift();
+}
+
+function stateOf(key, value){
+  if(key==='CO2'){
+    if(value <= THRESHOLDS.CO2) return { cls:'good', txt:'좋음' };
+    else return { cls:'bad', txt:'위험' };
+  }else if(key==='PM10'){
+    if(value <= THRESHOLDS.PM10) return { cls:'good', txt:'좋음' };
+    else return { cls:'bad', txt:'위험' };
+  }else if(key==='PM25'){
+    if(value <= THRESHOLDS.PM25) return { cls:'good', txt:'좋음' };
+    else return { cls:'bad', txt:'위험' };
+  }else{
+    // TEMP/HUM 상태는 참고용(항상 '좋음')
+    return { cls:'good', txt:'양호' };
+  }
+}
+
+function summaryText(){
+  const s = ['PM10','PM25','CO2'].map(k=>stateOf(k,cur[k]).cls);
+  const badCnt = s.filter(x=>x==='bad').length;
+  if(badCnt===0) return { text:'종합 평가: 쾌적', color:'var(--good)' };
+  if(badCnt===1) return { text:'종합 평가: 보통', color:'var(--warn)' };
+  return { text:'종합 평가: 주의', color:'var(--bad)' };
+}
+
+/* -----------------------------
+   렌더링
+----------------------------- */
+const cardsEl = document.getElementById('cards');
+const clockEl = document.getElementById('clock');
+const dotEl = document.getElementById('dot');
+const sumEl = document.getElementById('summary');
+
+const FIELDS = ['PM10','PM25','CO2','TEMP','HUM'];
+
+function renderCards(){
+  cardsEl.innerHTML = '';
+  FIELDS.forEach(key=>{
+    const val = cur[key];
+    const st  = stateOf(key,val);
+    const card = document.createElement('button');
+    card.className='card';
+    card.setAttribute('type','button');
+    card.setAttribute('data-key',key);
+    card.innerHTML = `
+      <div class="left">
+        <div class="icon">${ICONS[key]}</div>
+        <div>
+          <div class="label">${LABELS[key]}</div>
+          <div class="value">${val}<span class="unit">${UNITS[key]||''}</span></div>
+        </div>
+      </div>
+      <div class="state ${st.cls}">${st.txt}</div>
+    `;
+    // 클릭 + 터치 지원
+    bindTap(card, () => openChart(key));
+    cardsEl.appendChild(card);
+  });
+}
+
+function renderClock(){
+  const now = new Date();
+  const fmt = now.toLocaleString('ko-KR', { year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit' });
+  clockEl.textContent = `${fmt} · 30초 간격 업데이트`;
+}
+
+function renderSummary(){
+  const s = summaryText();
+  sumEl.textContent = s.text;
+  dotEl.style.background = s.color;
+}
+
+/* -----------------------------
+   차트 모달
+----------------------------- */
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const closeBtn = document.getElementById('closeModal');
+let chart;
+
+function openChart(key){
+  // PM10/PM2.5/CO2만 그래프 (TEMP/HUM은 선택적)
+  modal.style.display='flex';
+  modalTitle.textContent = `${LABELS[key]} 시간대별 측정값`;
+  if(chart){ chart.destroy(); chart=null; }
   const ctx = document.getElementById('chart').getContext('2d');
-  chart && chart.destroy();
-  const data = hist[key];
-  const color = key==='co2' ? 'rgba(234,179,8,.7)' : 'rgba(14,165,233,.75)';
-  chart = new Chart(ctx, {
+  const labels = historyMap[key].map(p=>new Date(p.t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));
+  const data   = historyMap[key].map(p=>p.v);
+
+  // 완만한 곡선을 위해 y축 여유폭 크게
+  const maxY = Math.max(...data, (key==='PM10')?140:(key==='PM25')?80:(key==='CO2')?1400:100);
+  chart = new Chart(ctx,{
     type:'line',
-    data:{
-      labels: labels.slice(),
-      datasets:[{
-        label:title,
-        data: data.slice(),
-        borderColor: color,
-        backgroundColor: gradient(ctx, color.replace('.75','.18')),
-        pointRadius: 2, tension:.25, fill:true
-      }]
-    },
-    options: baseOptions
+    data:{ labels, datasets:[{
+      label:`${LABELS[key]} 시간대별 측정값`,
+      data,
+      fill:true,
+      borderColor:'#10a6d1',
+      backgroundColor:'rgba(16,166,209,.12)',
+      tension:.35,
+      pointRadius:2
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ intersect:false, mode:'index' },
+      scales:{
+        y:{
+          suggestedMin:0,
+          suggestedMax:maxY,
+          ticks:{ font:{ weight:700 } }
+        },
+        x:{ ticks:{ maxRotation:0, autoSkip:true, font:{ weight:700 } } }
+      },
+      plugins:{ legend:{ display:false } }
+    }
   });
 }
-document.getElementById('btn-close').onclick=()=>document.getElementById('modal').classList.remove('show');
-document.getElementById('modal').addEventListener('click',e=>{
-  if(e.target.id==='modal') e.currentTarget.classList.remove('show');
-});
-document.querySelectorAll('.open-graph').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const key = btn.dataset.key;
-    const title = key==='pm10'?'PM10 시간대별 측정값'
-                 : key==='pm25'?'PM2.5 시간대별 측정값'
-                 : 'CO₂ 시간대별 측정값';
-    openChart(key, title);
-  }, {passive:true});
-});
-document.getElementById('btn-graph-all').addEventListener('click', ()=>openChart('pm10','PM10 시간대별 측정값'), {passive:true});
+function closeChart(){ modal.style.display='none'; }
+bindTap(closeBtn, closeChart);
+modal.addEventListener('click', (e)=>{ if(e.target===modal) closeChart(); });
 
-/* ------------------------------ 렌더 + 루프 ------------------------------ */
-function render(){
-  ['pm10','pm25','co2'].forEach(k=>{
-    elV[k].textContent = fmt(k, cur[k]);
-    setState(k, cur[k]);
-  });
+/* -----------------------------
+   주기 업데이트
+----------------------------- */
+function tick(){
+  const now = Date.now();
+  FIELDS.forEach(k => nextValue(k, now));
+  renderCards(); renderClock(); renderSummary();
 }
-function step(pushLabel=true){
-  const v1=nextValue('pm10',cur.pm10, 1.2, 12);
-  const v2=nextValue('pm25',cur.pm25, 0.7, 5.5);
-  const v3=nextValue('co2' ,cur.co2 , 6  , 90);
-  hist.pm10.push(v1); hist.pm10.shift();
-  hist.pm25.push(v2); hist.pm25.shift();
-  hist.co2 .push(v3); hist.co2 .shift();
-  if(pushLabel){ labels.push(timeLabel(0)); labels.shift(); }
-  render();
-  if(chart){ chart.data.labels = labels.slice(); chart.update('none'); }
+document.getElementById('refreshBtn').addEventListener('click', ()=>{ tick(); });
+
+/* 초기가입력 - 히스토리 채우기 */
+(function seed(){
+  const baseNow = Date.now() - MAX_POINTS*60000; // 1분 간격 가정
+  for(let i=0;i<MAX_POINTS;i++){
+    const t = baseNow + i*60000;
+    FIELDS.forEach(k=>{
+      // 아주 작은 변동으로 시드
+      const jitter = (k==='TEMP')? rand(-.08,.08) : (k==='HUM')? rand(-.5,.5) : rand(-1,1);
+      const v = (cur[k]+jitter);
+      historyMap[k].push({ t, v });
+    });
+  }
+  // 시드 후 한 번 렌더
+  renderCards(); renderClock(); renderSummary();
+})();
+
+// 30초마다
+setInterval(tick, 30000);
+
+/* -----------------------------
+   유틸
+----------------------------- */
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
+function round(n, d=1){ const f=Math.pow(10,d); return Math.round(n*f)/f; }
+
+// 모바일 탭/클릭 동시지원(이중 호출 방지)
+function bindTap(el, fn){
+  let locked = false;
+  const handler = (e)=>{ 
+    if(locked) return;
+    locked = true;
+    fn();
+    setTimeout(()=>locked=false, 300);
+  };
+  el.addEventListener('click', handler);
+  el.addEventListener('touchend', (e)=>{ e.preventDefault(); handler(e); }, {passive:false});
 }
-function forceRefresh(){ step(true); } // 외부에서 호출 가능
-window.forceRefresh = forceRefresh;
-
-render(); // 초기 표시
-/* 30초 간격 업데이트 */
-let timer = setInterval(()=>step(true), 30000);
-
-/* 즉시 새로고침 버튼 */
-document.getElementById('btn-refresh').onclick = ()=>forceRefresh();
-
-/* 탭 전환 후 복귀 시 한 번 강제 새로고침 */
-document.addEventListener('visibilitychange', ()=>{
-  if(!document.hidden) forceRefresh();
-});
-
-/* iOS 터치 초기화(클릭 인식 보조) */
-window.addEventListener('load', ()=>{
-  document.querySelectorAll('canvas').forEach(cv=>{
-    cv.addEventListener('touchstart', ()=>{}, {passive:true});
-  });
-});
 </script>
 </body>
 </html>
