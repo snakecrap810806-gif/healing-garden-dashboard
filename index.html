@@ -1,290 +1,331 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>디지털 치유정원·실시간 정원 환경 대시보드</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>디지털 치유정원·실시간 정원 환경 대시보드</title>
 
-  <!-- Pretendard/Noto 대체용 시스템 폰트 스택 -->
-  <style>
-    :root{
-      --ink:#0f172a; --muted:#64748b; --line:#e6eef6;
-      --good:#16a34a; --warn:#a16207; --bad:#991b1b;
-      --goodBg:#ecfdf5; --warnBg:#fffbeb; --badBg:#fef2f2;
-      --cardShadow:0 14px 40px rgba(15,23,42,.08);
-      --box: #fff;
-      --accent:#1e90ff;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--ink); font:16px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,Malgun Gothic,PingFang SC,Helvetica,Arial;
-      background: radial-gradient(1200px 600px at 80% -20%, #f0f7ff 0%, transparent 60%) #f7fbff;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .wrap{max-width:1200px; margin:28px auto; padding:0 16px}
-    .title{font-size:clamp(24px,3.6vw,44px); font-weight:900; letter-spacing:-0.02em; margin:10px 0 6px}
-    .subtitle{color:var(--muted); font-weight:600; display:flex; gap:10px; align-items:center}
-    .subtitle .btn{margin-left:auto}
-    .btn{
-      appearance:none; border:1px solid var(--line); background:#fff; color:#0f172a;
-      font-weight:800; padding:10px 14px; border-radius:999px; cursor:pointer;
-      box-shadow:0 4px 14px rgba(2,6,23,.06);
-    }
-    .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:16px}
-    @media (max-width:1024px){ .grid{grid-template-columns:repeat(2,1fr)} }
-    @media (max-width:640px){ .grid{grid-template-columns:1fr} }
+<!-- Nanum Gothic -->
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-    /* 카드 = 아이콘 -> 라벨 -> 값 -> 상태 */
-    .card{
-      background:var(--box); border:none; border-radius:20px; box-shadow:var(--cardShadow);
-      padding:26px 22px; display:flex; flex-direction:column; align-items:center; text-align:center;
-      cursor:pointer; user-select:none; touch-action:manipulation;
-      transition:transform .12s ease;
-    }
-    .card:active{transform:scale(.98)}
-    .icon{
-      width:64px; height:64px; border-radius:16px; display:grid; place-items:center; font-size:30px;
-      background:linear-gradient(135deg,#f2f8ff,#f2fffb);
-      box-shadow:0 6px 18px rgba(2,6,23,.06) inset;
-      color:#334155;
-    }
-    .label{margin-top:10px; font-weight:800; color:#617089; letter-spacing:-0.01em}
-    .value{margin-top:8px; font-size:42px; font-weight:900; letter-spacing:-0.02em}
-    .unit{margin-left:6px; color:#7d8aa6; font-weight:800}
-    .pill{
-      margin-top:12px; font-size:14px; font-weight:900; padding:7px 12px; border-radius:999px;
-      border:1px solid var(--line); background:#fff; color:#4b5563;
-    }
-    .pill.good{background:var(--goodBg); border-color:#a7f3d0; color:#166534}
-    .pill.warn{background:var(--warnBg); border-color:#fde68a; color:#a16207}
-    .pill.bad {background:var(--badBg);  border-color:#fecaca; color:#991b1b}
+<style>
+:root{
+  --ink:#0b1b2b;
+  --sub:#4b647d;
+  --bg:#f7fbff;
+  --card:#ffffff;
+  --ring:#eaf3ff;
+  --good:#16a34a;
+  --warn:#eab308;
+  --bad:#ef4444;
+  --shadow:0 10px 26px rgba(8,27,49,.06), 0 6px 14px rgba(8,27,49,.06);
+}
 
-    .foot{
-      margin-top:22px; border-radius:16px; padding:14px 16px; background:#ffffffd9;
-      border:1px solid var(--line); box-shadow:0 10px 26px rgba(2,6,23,.06);
-      display:flex; align-items:center; gap:10px; font-weight:800;
-    }
-    .dot{width:10px; height:10px; border-radius:50%; background:var(--good)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  font:16px/1.5 "Nanum Gothic", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, Noto Sans KR, Malgun Gothic, Helvetica, Arial;
+  background: radial-gradient(1200px 600px at 80% -20%, #eef6ff 0%, transparent 60%) var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
+.wrapper{max-width:1200px;margin:24px auto;padding:0 16px}
 
-    /* 모달(그래프) */
-    .backdrop{
-      position:fixed; inset:0; background:rgba(15,23,42,.42);
-      display:none; align-items:center; justify-content:center; padding:18px; z-index:1000;
-    }
-    .sheet{
-      width:min(1100px,96vw); background:#fff; border-radius:22px; border:1px solid var(--line);
-      box-shadow:0 30px 90px rgba(2,6,23,.28); padding:16px 16px 18px;
-    }
-    .sheet-head{display:flex; align-items:center; gap:8px; margin-bottom:8px}
-    .sheet-title{font-weight:900}
-    .sheet-close{margin-left:auto}
-    .sheet canvas{background:#fbfeff; border:1px solid var(--line); border-radius:12px; width:100% !important; height:340px !important}
-    @media (max-width:640px){ .sheet canvas{height:300px !important} }
-  </style>
+.title{font-size:clamp(22px, 2.6vw, 44px);font-weight:800;margin:8px 0 6px}
+.meta{color:var(--sub);font-size:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{background:#f0f7ff;border:1px solid #d7e9ff;border-radius:999px;padding:6px 12px;font-weight:700;color:#0b3a7a;cursor:pointer}
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+.grid{
+  display:grid;gap:18px;
+  grid-template-columns: repeat(4,1fr);
+}
+@media (max-width:1024px){ .grid{grid-template-columns: repeat(2,1fr);} }
+@media (max-width:560px){ .grid{grid-template-columns: 1fr;} }
+
+.card{
+  background:var(--card); border:1px solid var(--ring); border-radius:22px;
+  padding:22px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; gap:10px; cursor:pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.card:active{transform:scale(.995)}
+.card .icon{
+  width:64px;height:64px;border-radius:18px;
+  display:grid;place-items:center;
+  background:linear-gradient(180deg, #f4faff 0%, #e9f2ff 100%);
+  font-size:32px;
+}
+.label{color:var(--sub);font-size:15px}
+.value{font-size:42px;font-weight:800;letter-spacing:.5px;display:flex;align-items:baseline;gap:8px}
+.value .unit{font-size:22px;color:var(--sub);font-weight:700}
+.pill{
+  align-self:flex-start;margin-top:2px;
+  border-radius:999px;padding:6px 12px;font-weight:700;font-size:14px;color:#fff;
+}
+.pill.good{background:var(--good)} .pill.warn{background:var(--warn)} .pill.bad{background:var(--bad)}
+
+.summary{
+  margin:20px 0 6px; background:#fff; border:1px solid var(--ring);
+  border-radius:18px; padding:14px 16px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow);
+  color:var(--ink); font-weight:700
+}
+.dot{width:10px;height:10px;border-radius:50%;background:#18c36b}
+
+/* 모달 */
+.modal{
+  position:fixed; inset:0; background:rgba(0,0,0,.35); display:none;
+  align-items:center; justify-content:center; padding:18px; z-index:20;
+}
+.modal.open{display:flex}
+.modal-inner{
+  width:min(1100px, 100%); max-height:92vh; background:#fff; border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.18); padding:16px 16px 22px; overflow:hidden; display:flex; flex-direction:column;
+}
+.modal-title{font-weight:800;font-size:18px;margin:6px 8px 10px}
+.modal-body{padding:0 4px}
+.modal-foot{display:flex;justify-content:flex-end;padding-top:10px}
+.btn{
+  background:#0b5ed7; color:#fff; border:none; border-radius:10px;
+  padding:10px 14px; font-weight:700; cursor:pointer;
+}
+.btn:active{transform:translateY(1px)}
+canvas{max-height:62vh}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
+  <div class="wrapper">
     <div class="title">디지털 치유정원·실시간 정원 환경 대시보드</div>
-    <div class="subtitle">
-      <span id="clock">--</span>
-      · <span>30초 간격 업데이트</span>
-      <button id="refresh" class="btn">지금 새로고침</button>
+    <div class="meta">
+      <span id="now">--</span>
+      <span>·</span><span>30초 간격 업데이트</span>
+      <span class="badge" id="btnRefresh">지금 새로고침</span>
     </div>
 
-    <!-- 카드 5종 -->
-    <div class="grid">
+    <!-- 카드 8개 -->
+    <div class="grid" id="grid">
+      <!-- PM10 -->
       <div class="card" data-key="pm10">
         <div class="icon">☁️</div>
         <div class="label">PM10</div>
         <div class="value"><span id="pm10v">--</span><span class="unit">µg/m³</span></div>
         <div class="pill" id="pm10s">--</div>
       </div>
-
+      <!-- PM2.5 -->
       <div class="card" data-key="pm25">
         <div class="icon">🏙️</div>
         <div class="label">PM2.5</div>
         <div class="value"><span id="pm25v">--</span><span class="unit">µg/m³</span></div>
         <div class="pill" id="pm25s">--</div>
       </div>
-
+      <!-- CO2 -->
       <div class="card" data-key="co2">
-        <div class="icon">🫁</div>
+        <div class="icon">🟦</div>
         <div class="label">CO₂</div>
         <div class="value"><span id="co2v">--</span><span class="unit">ppm</span></div>
         <div class="pill" id="co2s">--</div>
       </div>
-
+      <!-- 온도 -->
       <div class="card" data-key="temp">
         <div class="icon">🌡️</div>
         <div class="label">온도</div>
         <div class="value"><span id="tempv">--</span><span class="unit">℃</span></div>
         <div class="pill" id="temps">--</div>
       </div>
-
+      <!-- 습도 -->
       <div class="card" data-key="humi">
         <div class="icon">💧</div>
         <div class="label">습도</div>
         <div class="value"><span id="humiv">--</span><span class="unit">%RH</span></div>
         <div class="pill" id="humis">--</div>
       </div>
+      <!-- 조도 -->
+      <div class="card" data-key="lux">
+        <div class="icon">🌞</div>
+        <div class="label">조도</div>
+        <div class="value"><span id="luxv">--</span><span class="unit">lux</span></div>
+        <div class="pill" id="luxs">--</div>
+      </div>
+      <!-- 소음 -->
+      <div class="card" data-key="noise">
+        <div class="icon">🔈</div>
+        <div class="label">소음</div>
+        <div class="value"><span id="noisev">--</span><span class="unit">dB</span></div>
+        <div class="pill" id="noises">--</div>
+      </div>
+      <!-- 풍속 -->
+      <div class="card" data-key="wind">
+        <div class="icon">🍃</div>
+        <div class="label">풍속</div>
+        <div class="value"><span id="windv">--</span><span class="unit">m/s</span></div>
+        <div class="pill" id="winds">--</div>
+      </div>
     </div>
 
-    <!-- 종합 평가 -->
-    <div class="foot">
-      <span class="dot" id="dot"></span>
-      <span id="summary">종합 평가: 계산 중…</span>
-    </div>
+    <div class="summary"><span class="dot"></span> 종합 평가: <span id="sumtxt" style="margin-left:6px;">--</span></div>
   </div>
 
   <!-- 그래프 모달 -->
-  <div class="backdrop" id="modal">
-    <div class="sheet" role="dialog" aria-modal="true">
-      <div class="sheet-head">
-        <div class="sheet-title" id="mtitle">그래프</div>
-        <button class="btn sheet-close" id="close">닫기</button>
+  <div class="modal" id="modal">
+    <div class="modal-inner">
+      <div class="modal-title" id="modaltitle">그래프</div>
+      <div class="modal-body">
+        <canvas id="chart" height="340"></canvas>
       </div>
-      <canvas id="mchart"></canvas>
+      <div class="modal-foot"><button class="btn" id="close">닫기</button></div>
     </div>
   </div>
 
 <script>
-/* ---------------- 기본 가상 센서 파라미터(매우 작은 변동) ---------------- */
-const base = { pm10: 35, pm25: 18, co2: 520, temp: 18.5, humi: 55 };
-const bounds = {
-  pm10:[12,60], pm25:[8,40], co2:[400,700], temp:[15,22], humi:[40,70]
+/* ========== 유틸 ========== */
+const clamp=(v,[mn,mx])=>Math.min(mx,Math.max(mn,v));
+const jitter=(v,step)=>v + (Math.random()*2-1)*step;
+function fmtTime(d){return d.toLocaleString('ko-KR',{year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'})}
+
+/* ========== 기준/초기값 ========== */
+const base={
+  pm10: 28, pm25: 14, co2: 520,
+  temp: 18.5, humi: 55,
+  lux: 12000, noise: 46, wind: 1.8
 };
-const limit = { pm10:100, pm25:50, co2:1000 }; // 기준치
-
-// Random walk(작은 폭), 10분에 1번 정도만 경고치 근접
-let tick = 0;
-function jitter(v,step=0.6){        // 변동폭 작게
-  const n = v + (Math.random()-0.5)*step;
-  return n;
-}
-function clamp(v,[min,max]){ return Math.max(min, Math.min(max, v)); }
-function stepData(){
-  tick++;
-  // 가끔 살짝 더 오르내리기(10분 1회 정도)
-  const pulse = (tick % 20 === 0) ? 1.4 : 1.0;
-
-  base.pm10 = clamp(jitter(base.pm10, 0.8)*pulse, bounds.pm10);
-  base.pm25 = clamp(jitter(base.pm25, 0.5)*pulse, bounds.pm25);
-  base.co2  = clamp(jitter(base.co2 , 6  )*pulse, bounds.co2);
-  base.temp = clamp(jitter(base.temp, 0.15), bounds.temp);
-  base.humi = clamp(jitter(base.humi, 0.6 ), bounds.humi);
-}
-
+const bounds={
+  pm10:[5,120], pm25:[2,80], co2:[350,1500],
+  temp:[-10,40], humi:[15,95],
+  lux:[100,80000], noise:[35,90], wind:[0,12]
+};
 // 상태 판정
 function state(key,val){
-  if(key==='pm10') return val<=limit.pm10?'good':'bad';
-  if(key==='pm25') return val<=limit.pm25?'good':'bad';
-  if(key==='co2')  return val<=limit.co2 ?'good':'bad';
-  if(key==='temp') return (val>=17 && val<=27)?'good':'warn';
-  if(key==='humi') return (val>=40 && val<=65)?'good':'warn';
+  if(key==='pm10'){ if(val>100) return 'bad'; if(val<=100) return 'good'; }
+  if(key==='pm25'){ if(val>50)  return 'bad'; if(val<=50)  return 'good'; }
+  if(key==='co2'){  if(val>1000) return 'bad'; if(val<=1000) return 'good'; }
+  if(key==='temp'){ if(val<0||val>32) return 'warn'; return 'good'; }
+  if(key==='humi'){ if(val<35||val>70) return 'warn'; return 'good'; }
+
+  if(key==='lux'){   if(val>=80000) return 'bad'; if(val>=500 && val<=50000) return 'good'; return 'warn'; }
+  if(key==='noise'){ if(val>70) return 'bad'; if(val<=55) return 'good'; return 'warn'; }
+  if(key==='wind'){  if(val>8)  return 'bad'; if(val>=0.5&&val<=5) return 'good'; return 'warn'; }
+
   return 'good';
 }
-function stateText(s){ return s==='good'?'좋음':(s==='warn'?'양호':'위험'); }
 
-// 렌더
+/* ========== 랜덤 워크(아주 작은 폭) ========== */
+let tick=0;
+function stepData(){
+  tick++;
+  base.pm10 = clamp(jitter(base.pm10, 0.8), bounds.pm10);
+  base.pm25 = clamp(jitter(base.pm25, 0.5), bounds.pm25);
+  base.co2  = clamp(jitter(base.co2 , 5  ), bounds.co2);
+  base.temp = clamp(jitter(base.temp, 0.08), bounds.temp);
+  base.humi = clamp(jitter(base.humi, 0.4 ), bounds.humi);
+
+  base.lux   = clamp(jitter(base.lux,   200)*(tick%20===0?1.12:1.0), bounds.lux);
+  base.noise = clamp(jitter(base.noise, 0.7 ), bounds.noise);
+  base.wind  = clamp(jitter(base.wind,  0.12), bounds.wind);
+}
+
+/* ========== 렌더링 ========== */
+function renderTime(){ document.getElementById('now').textContent = fmtTime(new Date()); }
+
 function renderCards(){
-  const v = (id,val)=> document.getElementById(id).textContent = String(val);
-  v('pm10v', Math.round(base.pm10));
-  v('pm25v', Math.round(base.pm25));
-  v('co2v',  Math.round(base.co2));
-  v('tempv', base.temp.toFixed(1));
-  v('humiv', Math.round(base.humi));
+  const set = (id,val)=>document.getElementById(id).textContent=val;
 
-  ['pm10','pm25','co2','temp','humi'].forEach(k=>{
+  set('pm10v', Math.round(base.pm10));
+  set('pm25v', Math.round(base.pm25));
+  set('co2v' , Math.round(base.co2));
+  set('tempv', (Math.round(base.temp*10)/10).toFixed(1));
+  set('humiv', Math.round(base.humi));
+  set('luxv' , Math.round(base.lux));
+  set('noisev',Math.round(base.noise));
+  set('windv',(Math.round(base.wind*10)/10).toFixed(1));
+
+  ['pm10','pm25','co2','temp','humi','lux','noise','wind'].forEach(k=>{
     const s = state(k, base[k]);
     const el = document.getElementById(k+'s');
-    el.className='pill '+s; el.textContent=stateText(s);
+    if(!el) return;
+    el.className = 'pill ' + s;
+    el.textContent = (s==='good'?'좋음':(s==='warn'?'양호':'위험'));
   });
 
-  // 종합(하나라도 위험이면 위험, 아니면 양호/좋음)
-  const keys=['pm10','pm25','co2','temp','humi'];
-  const flags = keys.map(k=>state(k,base[k]));
-  let sumText='쾌적';
-  let dot='#16a34a';
-  if(flags.includes('bad')){ sumText='주의(위험)'; dot='#dc2626'; }
-  else if(flags.includes('warn')){ sumText='양호'; dot='#ca8a04'; }
-  document.getElementById('summary').textContent = '종합 평가: ' + sumText;
-  document.getElementById('dot').style.background = dot;
+  // 종합 평가: 나쁨 하나라도 있으면 ‘주의’, 모두 좋음이면 ‘쾌적’, 그 외 ‘보통’
+  const arr=['pm10','pm25','co2','temp','humi','lux','noise','wind'].map(k=>state(k,base[k]));
+  let sum = '보통';
+  if(arr.every(s=>s==='good')) sum='쾌적';
+  if(arr.includes('bad')) sum='주의';
+  document.getElementById('sumtxt').textContent = sum;
 }
 
-// 시계 + 주기 업데이트
-function clock(){ document.getElementById('clock').textContent =
-  new Date().toLocaleString('ko-KR', {year:'numeric', month:'numeric', day:'numeric',
-    hour:'numeric', minute:'2-digit', second:'2-digit'}) + ' 기준'; }
-
-function tickAll(){
-  stepData(); renderCards(); clock();
-}
-setInterval(()=>{ tickAll(); pushHistory(); }, 30000);
-
-// 초기화
-tickAll();
-document.getElementById('refresh').addEventListener('click', ()=>{ tickAll(); pushHistory(); });
-
-/* ---------------- 그래프(카드 클릭→모달) ---------------- */
-const modal = document.getElementById('modal');
-const closeBtn = document.getElementById('close');
-let chart;
-const history = { pm10:[], pm25:[], co2:[], temp:[], humi:[], labels:[] };
-
+/* ========== 히스토리/그래프 ========== */
+const history={}; const keys=['pm10','pm25','co2','temp','humi','lux','noise','wind'];
+keys.forEach(k=>history[k]=[]);
+const names={
+  pm10:'PM10(µg/m³)', pm25:'PM2.5(µg/m³)', co2:'CO₂(ppm)',
+  temp:'온도(℃)', humi:'습도(%RH)', lux:'조도(lux)',
+  noise:'소음(dB)', wind:'풍속(m/s)'
+};
 function pushHistory(){
-  const t = new Date();
-  const label = t.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  history.labels.push(label);
-  ['pm10','pm25','co2','temp','humi'].forEach(k=> history[k].push(Math.round(base[k]*10)/10));
-  // 최대 24개(약 12시간) 보이도록
-  const cap = 24;
-  if(history.labels.length>cap){ history.labels.shift(); ['pm10','pm25','co2','temp','humi'].forEach(k=>history[k].shift()); }
+  keys.forEach(k=>history[k].push(Math.round(base[k]*10)/10));
+  // 길이 유지(최근 60포인트 = 30분)
+  keys.forEach(k=>{ if(history[k].length>60) history[k].shift(); });
 }
-pushHistory(); // 첫 점
-
+let chart; let currentKey='pm10';
 function openChart(key){
-  const names = {pm10:'PM10(µg/m³)', pm25:'PM2.5(µg/m³)', co2:'CO₂(ppm)', temp:'온도(℃)', humi:'습도(%RH)'};
-  document.getElementById('mtitle').textContent = names[key] + ' 시간추이';
-  modal.style.display='flex';
-
-  const ctx = document.getElementById('mchart').getContext('2d');
+  currentKey=key;
+  document.getElementById('modaltitle').textContent = names[key]+' 시간추이';
+  const ctx=document.getElementById('chart');
   if(chart){ chart.destroy(); }
-  chart = new Chart(ctx, {
+  const labels=Array.from({length:history[key].length}, (_,i)=>i+1);
+  chart=new Chart(ctx,{
     type:'line',
-    data:{ labels: history.labels,
+    data:{
+      labels,
       datasets:[{
-        label: names[key],
+        label:names[key],
         data: history[key],
-        borderColor:'#22a6b3',
-        backgroundColor:'rgba(34,166,179,.16)',
-        tension:.25, fill:true, pointRadius:2
+        borderColor:'#00a3b9',
+        backgroundColor:'rgba(0,163,185,.15)',
+        fill:true, tension:.25, pointRadius:2, borderWidth:3
       }]
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'nearest', intersect:false },
-      plugins:{ legend:{display:true, labels:{boxWidth:10}} },
+      interaction:{mode:'index',intersect:false},
       scales:{
-        x:{ grid:{color:'rgba(2,6,23,.06)'}, ticks:{ color:'#475569', maxRotation:0, autoSkip:true }},
-        y:{ grid:{color:'rgba(2,6,23,.06)'}, ticks:{ color:'#334155' } }
-      }
+        x:{ grid:{color:'rgba(0,0,0,.05)'} , ticks:{color:'#6b7b8c'} },
+        y:{ grid:{color:'rgba(0,0,0,.06)'} , ticks:{color:'#6b7b8c'} }
+      },
+      plugins:{ legend:{display:false} }
     }
   });
+  document.getElementById('modal').classList.add('open');
 }
-closeBtn.onclick=()=> modal.style.display='none';
-modal.addEventListener('click',e=>{ if(e.target===modal) modal.style.display='none'; });
-
-// 카드 클릭
-document.querySelectorAll('.card').forEach(c=>{
-  c.addEventListener('click', ()=> openChart(c.dataset.key), {passive:true});
+document.getElementById('close').onclick=()=>document.getElementById('modal').classList.remove('open');
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target.id==='modal') e.currentTarget.classList.remove('open');
 });
 
-// 모바일 터치 전달 강화(iframe 환경 대비)
-document.body.style.touchAction='manipulation';
+/* ========== 이벤트 ========== */
+document.getElementById('btnRefresh').onclick=()=>{
+  stepData(); renderTime(); renderCards(); pushHistory();
+};
+document.querySelectorAll('.card').forEach(c=>{
+  c.addEventListener('click',()=>openChart(c.dataset.key),{passive:true});
+});
+
+/* ========== 루프 시작 ========== */
+function tickLoop(){
+  stepData(); renderTime(); renderCards(); pushHistory();
+}
+function init(){
+  // 초기 히스토리 몇 포인트 채워서 그래프가 평평하지 않게
+  for(let i=0;i<10;i++){ stepData(); pushHistory(); }
+  renderTime(); renderCards();
+  // 30초 주기
+  setInterval(tickLoop, 30000);
+}
+init();
 </script>
 </body>
 </html>
