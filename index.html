@@ -28,7 +28,6 @@
     background: var(--bg);
     overflow:hidden;
   }
-  /* background forest gradient (embedded SVG) */
   body::before{
     content:"";
     position:fixed; inset:0; z-index:-1;
@@ -39,9 +38,7 @@
     filter: saturate(1.1);
   }
   .wrap{max-width:1920px; height:100%; margin:0 auto; padding:20px 28px 28px;}
-  header{
-    display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:14px;
-  }
+  header{display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:14px;}
   .title{
     font-family:"Nanum Gothic", "Noto Sans KR", sans-serif;
     font-weight:800; letter-spacing:-.5px; font-size:40px;
@@ -67,7 +64,7 @@
     box-shadow:var(--shadow);
     padding:18px 18px 12px;
     display:flex; flex-direction:column;
-    min-height:0; /* allow internal grid to size */
+    min-height:0;
   }
   .card-head{display:flex; align-items:center; gap:10px; margin-bottom:4px}
   .icon{
@@ -89,7 +86,6 @@
   .actions{display:flex; gap:8px; margin-top:10px}
   .mini{font-size:13px; padding:6px 10px; border-radius:10px; border:1px solid #244940; background:#12221d; color:#cfeee6; cursor:pointer}
   .mini:hover{filter:brightness(1.1)}
-  /* bottom evaluation */
   .eval{
     grid-column:1 / -1; background:linear-gradient(180deg,var(--card), var(--glass));
     border-radius:var(--radius); border:1px solid rgba(90,240,196,.25); box-shadow:var(--shadow);
@@ -97,7 +93,6 @@
   }
   .dot{width:10px; height:10px; border-radius:50%; background:var(--good); box-shadow:0 0 12px var(--good)}
   .score{margin-left:auto; font-weight:800; color:#dffaf2}
-  /* modal */
   .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:99;}
   .modal{
     width:min(1400px, 70vw); height:min(820px, 70vh); background:#0f1a16; border:1px solid #2b4b41;
@@ -147,244 +142,4 @@ const DEF = {
   PM10: 100,
   PM25: 50,
   CO2: 1000,
-  TEMP: [18, 26],    // 쾌적 범위
-  HUMI: [40, 65],    // 쾌적 범위
-  NOISE: 65,         // dB
-  WIND: 6,           // m/s
-  LUX: 1500          // lux (정원 조도 기준은 상황별 상이, 예시)
-}
-
-const CARDS = [
-  { key:'pm10',  name:'PM10',  unit:'µg/m³', base: 32,  limit: DEF.PM10, icon:'🌫️' },
-  { key:'pm25',  name:'PM2.5', unit:'µg/m³', base: 17,  limit: DEF.PM25, icon:'🏙️' },
-  { key:'co2',   name:'CO₂',   unit:'ppm',   base: 520, limit: DEF.CO2,  icon:'🧪' },
-  { key:'temp',  name:'온도',   unit:'℃',    base: 18.8,range: DEF.TEMP, icon:'🌡️' },
-  { key:'humi',  name:'습도',   unit:'%RH',  base: 55,  range: DEF.HUMI, icon:'💧' },
-  { key:'lux',   name:'조도',   unit:'lux',  base: 480, limit: DEF.LUX,  icon:'💡' },
-  { key:'noise', name:'소음',   unit:'dB',   base: 52,  limit: DEF.NOISE, icon:'🔊' },
-  { key:'wind',  name:'풍속',   unit:'m/s',  base: 1.2, limit: DEF.WIND, icon:'🍃' }
-];
-
-// ---------- state ----------
-const state = {
-  series: {},   // {key: number[]}
-  charts: {},   // sparkline charts
-  modalChart: null
-};
-
-// ---------- utils ----------
-const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-function rndWalk(v, amt=1, min=0, max=9999){
-  const next = v + (Math.random()*2-1)*amt;
-  return clamp(+next.toFixed(2), min, max);
-}
-function fmt(v){ return (Math.round(v*10)/10).toString().replace(/\.0$/,''); }
-
-function statusFor(card, value){
-  if(card.range){ // 범위 안이면 좋음/양호
-    const [a,b] = card.range;
-    if(value>=a && value<=b) return {text:'좋음', cls:''};
-    if(value>=a-1 && value<=b+1) return {text:'양호', cls:''};
-    if(value>=a-3 && value<=b+3) return {text:'주의', cls:'warn'};
-    return {text:'위험', cls:'bad'};
-  }else if(card.limit!=null){
-    if(value<=card.limit*0.7) return {text:'좋음', cls:''};
-    if(value<=card.limit) return {text:'양호', cls:''};
-    if(value<=card.limit*1.2) return {text:'주의', cls:'warn'};
-    return {text:'위험', cls:'bad'};
-  }
-  return {text:'-', cls:''};
-}
-
-// 점수(100 만점)
-function scoreFor(card, value){
-  if(card.range){
-    const [a,b]=card.range; const mid=(a+b)/2; const span=(b-a)/2;
-    const dist=Math.abs(value-mid);
-    const s = clamp(100 - (dist/span)*40, 0, 100);
-    return s;
-  }else{
-    const lim=card.limit||100;
-    const ratio = value/lim;
-    let s;
-    if(ratio<=0.7) s=100;
-    else if(ratio<=1) s=85-(ratio-0.7)*50;   // 85~70
-    else if(ratio<=1.2) s=70-(ratio-1)*100;  // 70~50
-    else s= clamp(50-(ratio-1.2)*120, 0, 50);
-    return clamp(s,0,100);
-  }
-}
-
-function overall(){
-  const weights = {pm10:1.2, pm25:1.2, co2:1.1, temp:1, humi:1, noise:0.7, wind:0.7, lux:0.5};
-  let sum=0, wsum=0;
-  for(const c of CARDS){
-    const arr = state.series[c.key]; const val = arr.at(-1);
-    const s = scoreFor(c,val);
-    const w = (weights[c.key]||1);
-    sum += s*w; wsum += w;
-  }
-  return Math.round(sum/wsum);
-}
-function overallLabel(sc){
-  if(sc>=85) return {text:`쾌적 (${sc})`, color:'var(--good)'};
-  if(sc>=70) return {text:`양호 (${sc})`, color:'var(--warn)'};
-  return {text:`주의 (${sc})`, color:'var(--danger)'};
-}
-
-// ---------- layout ----------
-function makeCard(card){
-  const el=document.createElement('div');
-  el.className='card';
-  el.innerHTML=`
-    <div class="card-head">
-      <div class="icon">${card.icon}</div>
-      <div class="name">${card.name}</div>
-      <div class="status-pill" id="${card.key}-pill">좋음</div>
-    </div>
-    <div class="value-row">
-      <div class="value" id="${card.key}-val">--</div>
-      <div class="unit">${card.unit}</div>
-    </div>
-    <div class="spark-wrap"><canvas class="spark" id="${card.key}-spark"></canvas></div>
-    <div class="actions">
-      <button class="mini" data-graph="${card.key}">그래프</button>
-    </div>
-  `;
-  return el;
-}
-
-function build(){
-  const grid=document.getElementById('grid');
-  grid.innerHTML='';
-  // 8 cards
-  CARDS.forEach(c=> grid.appendChild(makeCard(c)));
-  // evaluation row
-  const evalEl=document.createElement('div');
-  evalEl.className='eval';
-  evalEl.innerHTML=`<div class="dot" id="evalDot"></div><div id="evalText">종합 평가: -</div><div class="score" id="evalScore"></div>`;
-  grid.appendChild(evalEl);
-  // series init + charts
-  CARDS.forEach(c=>{
-    const arr=Array.from({length:DEF.points}, (_,i)=> c.base);
-    state.series[c.key]=arr;
-    // sparkline
-    const ctx=document.getElementById(`${c.key}-spark`);
-    state.charts[c.key]=new Chart(ctx,{
-      type:'line',
-      data:{ labels:Array.from({length:DEF.points},(_,i)=>i),
-             datasets:[{
-               data:arr, fill:true, tension:0.35, pointRadius:0,
-               borderColor: getColor(c.key), backgroundColor: getColor(c.key,0.18)
-             }]},
-      options:{
-        responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled:false}},
-        scales:{x:{display:false}, y:{display:false}}
-      }
-    });
-  });
-  attachHandlers();
-  renderAll();
-}
-
-function getColor(key, alpha=1){
-  const map={pm10:'#52e3c2', pm25:'#4ecbff', co2:'#ffd166', temp:'#f78c6b', humi:'#9ae6b4', lux:'#d6bcfa', noise:'#f4a3a3', wind:'#7dd3fc'};
-  const hex=map[key]||'#5af0c4';
-  if(alpha===1) return hex;
-  // hex -> rgba
-  const bigint = parseInt(hex.replace('#',''),16);
-  const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255;
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-// ---------- update/render ----------
-function tick(){
-  CARDS.forEach(c=>{
-    const arr=state.series[c.key];
-    const last=arr.at(-1);
-    // 작은 변동폭 (급변 억제)
-    let amt=1;
-    if(['temp'].includes(c.key)) amt=0.15;
-    if(['humi'].includes(c.key)) amt=0.6;
-    if(['lux'].includes(c.key)) amt=10;
-    if(['noise'].includes(c.key)) amt=0.8;
-    if(['wind'].includes(c.key)) amt=0.2;
-    if(['pm10','pm25'].includes(c.key)) amt=0.8;
-    if(['co2'].includes(c.key)) amt=6;
-
-    const min=0;
-    const max = (c.key==='lux')? 2000 : (c.key==='co2'? 2000 : (c.key==='temp'? 35 : (c.key==='humi'? 100 : 120)));
-    const next=rndWalk(last, amt, min, max);
-    arr.push(next); while(arr.length>DEF.points) arr.shift();
-    state.charts[c.key].update('none');
-  });
-  renderAll();
-}
-
-function renderAll(){
-  // values + pills
-  CARDS.forEach(c=>{
-    const val = state.series[c.key].at(-1);
-    document.getElementById(`${c.key}-val`).textContent=fmt(val);
-    const p=document.getElementById(`${c.key}-pill`);
-    const st=statusFor(c,val);
-    p.textContent=st.text; p.className='status-pill '+(st.cls||'');
-  });
-  // timestamp
-  document.getElementById('time').textContent = new Date().toLocaleString('ko-KR') + ` · ${DEF.updateSec}초 간격 업데이트`;
-  // overall
-  const sc=overall(); const lbl=overallLabel(sc);
-  const dot=document.getElementById('evalDot'); dot.style.background=lbl.color; dot.style.boxShadow=`0 0 12px ${lbl.color}`;
-  document.getElementById('evalText').textContent='종합 평가: '+lbl.text;
-  document.getElementById('evalScore').textContent='점수 '+sc;
-}
-
-// ---------- modal ----------
-function openModal(cardKey){
-  const card = CARDS.find(c=>c.key===cardKey);
-  const overlay=document.getElementById('overlay');
-  overlay.style.display='flex';
-  document.getElementById('modalTitle').textContent=`${card.name} 시간별 추이`;
-  const ctx=document.getElementById('modalChart').getContext('2d');
-  state.modalChart && state.modalChart.destroy();
-
-  // y축 패딩(추이 과장 방지)
-  const data = state.series[cardKey];
-  const min=Math.min(...data), max=Math.max(...data);
-  const pad = (max-min)*0.3 || 1;
-  const yMin = Math.max(0, min-pad);
-  const yMax = max+pad;
-
-  state.modalChart = new Chart(ctx,{
-    type:'line',
-    data:{ labels: Array.from({length:data.length},(_,i)=> i),
-           datasets:[{ label: card.name, data, fill:true, tension:0.35,
-             borderColor:getColor(card.key), backgroundColor:getColor(card.key,0.18),
-             pointRadius:2 }]},
-    options:{
-      responsive:true, maintainAspectRatio:false, interaction:{mode:'nearest', intersect:false},
-      plugins:{ legend:{display:true}, tooltip:{enabled:true} },
-      scales:{ x:{ ticks:{color:'#b7d5ce'}}, y:{ min:yMin, max:yMax, ticks:{color:'#b7d5ce'} } }
-    }
-  });
-}
-function closeModal(){ document.getElementById('overlay').style.display='none'; }
-
-function attachHandlers(){
-  document.getElementById('btnClose').onclick=closeModal;
-  document.getElementById('overlay').addEventListener('click', (e)=>{
-    if(e.target.id==='overlay') closeModal();
-  });
-  document.getElementById('forceRefresh').onclick=()=> tick();
-  // card graph buttons
-  document.querySelectorAll('[data-graph]').forEach(btn=>{
-    btn.addEventListener('click', e=> openModal(e.currentTarget.dataset.graph));
-  });
-}
-
-// ---------- start ----------
-build();
-setInterval(tick, DEF.updateSec*1000);
-</script>
-</body>
-</html>
+  TE
