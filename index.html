@@ -4,142 +4,332 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>디지털 치유정원 · 실시간 환경 대시보드</title>
+
+<!-- 폰트 -->
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@700;800&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <style>
   :root{
-    --bg:#0e1513;
-    --card:#0f1916cc;
-    --glass:#14221ecc;
-    --mint:#3ee2a8;
-    --text:#e9f3ef;
-    --muted:#9fb5ae;
-    --accent:#5af0c4;
-    --danger:#ff6b6b;
+    --bg:#0f1714;
+    --panel:#111c18cc;
+    --panel2:#0f1916cc;
+    --border:#2d4f45;
+    --mint:#55e0c3;
+    --text:#e7f2ee;
+    --muted:#a7beb7;
+    --ok:#38d996;
     --warn:#ffd166;
-    --good:#38d996;
-    --shadow: 0 12px 24px rgba(0,0,0,.35);
-    --radius:18px;
+    --bad:#ff7b7b;
+    --shadow:0 14px 26px rgba(0,0,0,.35);
+    --r:18px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0; color:var(--text); font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Apple SD Gothic Neo","Nanum Gothic","맑은 고딕",sans-serif;
+    margin:0; color:var(--text);
+    font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Nanum Gothic","Apple SD Gothic Neo","맑은 고딕",sans-serif;
     background: var(--bg);
     overflow:hidden;
   }
+  /* 배경 무드 */
   body::before{
-    content:"";
-    position:fixed; inset:0; z-index:-1;
+    content:""; position:fixed; inset:0; z-index:-1;
     background:
-      radial-gradient(1000px 600px at 30% 120%, #13302a 0%, transparent 60%),
-      radial-gradient(900px 500px at 80% -10%, #1a3a31 0%, transparent 65%),
-      linear-gradient(180deg, rgba(24,36,32,0.85) 0%, rgba(10,15,13,0.95) 70%);
-    filter: saturate(1.1);
+      radial-gradient(1100px 700px at 25% 115%, #17332b 0%, transparent 65%),
+      radial-gradient(900px 580px at 85% -10%, #1a3a31 0%, transparent 65%),
+      linear-gradient(180deg, rgba(22,34,30,.9), rgba(10,15,13,.96) 65%);
+    filter:saturate(1.05);
   }
-  .wrap{max-width:1920px; height:100%; margin:0 auto; padding:20px 28px 28px;}
-  header{display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:14px;}
+
+  .wrap{max-width:1920px; height:100%; margin:0 auto; padding:20px 26px 26px;}
+  header{display:flex; align-items:flex-end; gap:18px; margin-bottom:12px; flex-wrap:wrap}
   .title{
-    font-family:"Nanum Gothic", "Noto Sans KR", sans-serif;
-    font-weight:800; letter-spacing:-.5px; font-size:40px;
-    text-shadow:0 1px 0 #000;
+    font-family:"Nanum Gothic","Noto Sans KR",sans-serif; font-weight:800;
+    font-size:42px; letter-spacing:-.5px; text-shadow:0 1px 0 #000;
   }
-  .timestamp{color:var(--muted); font-size:15px}
-  .right{margin-left:auto; display:flex; align-items:center; gap:10px}
+  .time{color:var(--muted); font-size:15px; margin-left:6px}
+  .right{margin-left:auto}
   .btn{
-    background:linear-gradient(180deg, #1b2b26, #0f1b17);
-    color:#cfeee6; border:1px solid #214238; padding:10px 14px; border-radius:12px;
-    cursor:pointer; box-shadow:var(--shadow); font-weight:700
+    background:linear-gradient(180deg,#1a2a25,#0f1b17);
+    color:#d6f2eb; border:1px solid #284a40;
+    padding:10px 14px; border-radius:12px; cursor:pointer; box-shadow:var(--shadow); font-weight:700
   }
   .btn:hover{filter:brightness(1.1)}
+
+  /* 그리드 */
   .grid{
-    display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(2, 1fr);
-    gap:18px; height:calc(100% - 90px);
+    display:grid; gap:18px;
+    grid-template-columns:repeat(4,1fr);
+    grid-template-rows:repeat(2, 1fr) auto;   /* 마지막 줄: 종합평가 바 */
+    height:calc(100% - 86px);
   }
+
+  /* 카드 */
   .card{
-    background:linear-gradient(180deg,var(--card), var(--glass));
-    backdrop-filter: blur(8px);
-    border:1px solid rgba(90,240,196,.25);
-    border-radius:var(--radius);
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid rgba(85,224,195,.25);
+    border-radius:var(--r);
     box-shadow:var(--shadow);
-    padding:18px 18px 12px;
-    display:flex; flex-direction:column;
-    min-height:0;
+    padding:18px 18px 14px;
+    display:flex; flex-direction:column; min-height:0;
   }
-  .card-head{display:flex; align-items:center; gap:10px; margin-bottom:4px}
-  .icon{
-    width:28px; height:28px; border-radius:8px; display:grid; place-items:center;
-    background: #162a24; color:#a9f5dd; font-size:16px; border:1px solid #23493f;
-  }
-  .name{font-weight:700; letter-spacing:.4px; color:#cfeee6}
-  .status-pill{
-    margin-left:auto; padding:6px 10px; border-radius:999px; font-size:13px; font-weight:700;
-    border:1px solid #1f3f35; color:#07261d; background:var(--good);
-  }
-  .status-pill.warn{background:var(--warn); color:#3c2a00}
-  .status-pill.bad{background:#ff8e8e; color:#3c0000}
-  .value-row{display:flex; align-items:baseline; gap:10px; margin:8px 0 6px}
-  .value{font-size:44px; font-weight:800; letter-spacing:.5px}
+  .card-head{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  .bullet{width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+          background:#172822; border:1px solid #284a40; color:#9ff0d6; font-size:15px}
+  .name{font-weight:700; color:#d0eee6}
+  .pill{margin-left:auto; padding:6px 10px; border-radius:999px; font-size:13px; font-weight:700;
+        border:1px solid #1e3c33; color:#06241b; background:var(--ok)}
+  .pill.warn{background:var(--warn); color:#3a2b00}
+  .pill.bad{background:var(--bad); color:#3a0000}
+
+  .value-row{display:flex; align-items:baseline; gap:10px; margin:6px 0 8px}
+  .val{font-size:44px; font-weight:800; letter-spacing:.5px}
   .unit{color:var(--muted); font-size:18px; font-weight:700}
+
+  /* 스파크 그래프(작게) */
   .spark-wrap{margin-top:auto}
-  .spark{height:72px !important}
-  .actions{display:flex; gap:8px; margin-top:10px}
-  .mini{font-size:13px; padding:6px 10px; border-radius:10px; border:1px solid #244940; background:#12221d; color:#cfeee6; cursor:pointer}
+  .spark{height:110px !important} /* 고정 높이로 흐름 방지 */
+
+  .actions{margin-top:10px}
+  .mini{font-size:13px; padding:6px 10px; border-radius:10px; border:1px solid #284a40;
+        background:#12221d; color:#d6f2eb; cursor:pointer}
   .mini:hover{filter:brightness(1.1)}
+
+  /* 종합평가 바 */
   .eval{
-    grid-column:1 / -1; background:linear-gradient(180deg,var(--card), var(--glass));
-    border-radius:var(--radius); border:1px solid rgba(90,240,196,.25); box-shadow:var(--shadow);
-    display:flex; align-items:center; gap:12px; padding:14px 18px; color:#d8f5ec;
+    grid-column:1 / -1;
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid rgba(85,224,195,.25);
+    border-radius:var(--r); box-shadow:var(--shadow);
+    display:flex; align-items:center; gap:12px; padding:14px 18px; color:#dff6ef;
   }
-  .dot{width:10px; height:10px; border-radius:50%; background:var(--good); box-shadow:0 0 12px var(--good)}
-  .score{margin-left:auto; font-weight:800; color:#dffaf2}
-  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:99;}
-  .modal{
-    width:min(1400px, 70vw); height:min(820px, 70vh); background:#0f1a16; border:1px solid #2b4b41;
-    border-radius:18px; box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column;
-  }
-  .modal header{margin:0 0 6px 0}
+  .dot{width:10px; height:10px; border-radius:50%; background:var(--ok);
+       box-shadow:0 0 12px var(--ok)}
+
+  /* 모달 */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:99}
+  .modal{width:min(1400px, 70vw); height:min(830px, 70vh); background:#0f1a16; border:1px solid #2a4d42;
+         border-radius:18px; box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column}
+  .modal header{display:flex; align-items:center; gap:10px; margin-bottom:8px}
   .modal h3{margin:0; font-size:20px}
-  .close{margin-left:auto; background:#172722; color:#cfeee6; border:1px solid #2a4d42; border-radius:10px; padding:6px 10px; cursor:pointer}
-  .modal canvas{flex:1}
+  .close{margin-left:auto; background:#172722; color:#d6f2eb; border:1px solid #2a4d42; border-radius:10px; padding:6px 10px; cursor:pointer}
+
   @media (max-width:1200px){
-    .title{font-size:28px}
-    .grid{grid-template-columns:repeat(2, 1fr); grid-template-rows:repeat(4, 1fr)}
+    .title{font-size:30px}
+    .grid{grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(4,1fr) auto}
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
+<div class="wrap">
+  <header>
+    <div class="title">디지털 치유정원 · 실시간 환경 대시보드</div>
+    <div id="ts" class="time">--:--</div>
+    <div class="right"><button id="refresh" class="btn">지금 새로고침</button></div>
+  </header>
+
+  <section class="grid" id="grid"></section>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="modal">
     <header>
-      <div class="title">디지털 치유정원 · 실시간 환경 대시보드</div>
-      <div id="time" class="timestamp">--:--</div>
-      <div class="right">
-        <button id="forceRefresh" class="btn">지금 새로고침</button>
-      </div>
+      <h3 id="modalTitle">그래프</h3>
+      <button class="close" id="btnClose">닫기</button>
     </header>
-
-    <section class="grid" id="grid">
-      <!-- cards are injected here -->
-    </section>
+    <canvas id="modalChart"></canvas>
   </div>
-
-  <!-- Modal -->
-  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
-    <div class="modal">
-      <header>
-        <h3 id="modalTitle">그래프</h3>
-        <button class="close" id="btnClose">닫기</button>
-      </header>
-      <canvas id="modalChart"></canvas>
-    </div>
-  </div>
+</div>
 
 <script>
-// ---------- config ----------
-const DEF = {
+/* ===== 설정 ===== */
+const cfg = {
   updateSec: 30,
-  points: 60,
-  PM10: 100,
-  PM25: 50,
-  CO2: 1000,
-  TE
+  points: 120
+};
+const CARDS = [
+  { key:'pm10',  name:'PM10',  unit:'µg/m³', base:30,  limit:100, icon:'🌫️' },
+  { key:'pm25',  name:'PM2.5', unit:'µg/m³', base:18,  limit:50,  icon:'🏙️' },
+  { key:'co2',   name:'CO₂',   unit:'ppm',   base:500, limit:1000,icon:'🧪' },
+  { key:'temp',  name:'온도',   unit:'℃',    base:19.5,range:[18,26], icon:'🌡️' },
+  { key:'humi',  name:'습도',   unit:'%RH',  base:52,  range:[40,65], icon:'💧' },
+  { key:'lux',   name:'조도',   unit:'lux',  base:600, limit:1500, icon:'💡' },
+  { key:'noise', name:'소음',   unit:'dB',   base:48,  limit:65,   icon:'🔊' },
+  { key:'wind',  name:'풍속',   unit:'m/s',  base:0.6, limit:6,    icon:'🍃' }
+];
+
+/* ===== 상태 ===== */
+const S = { series:{}, charts:{}, modal:null };
+
+/* ===== 유틸 ===== */
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const r=(min,max)=>Math.random()*(max-min)+min;
+const fmt=v=>(Math.round(v*10)/10).toString().replace(/\.0$/,'');
+function walk(last, amt, min=0, max=9999){ return clamp(+((last + (Math.random()*2-1)*amt)).toFixed(2), min, max); }
+
+function status(card,val){
+  if(card.range){
+    const [a,b]=card.range;
+    if(val>=a && val<=b) return {t:'좋음', cls:''};
+    if(val>=a-1 && val<=b+1) return {t:'양호', cls:''};
+    if(val>=a-3 && val<=b+3) return {t:'주의', cls:'warn'};
+    return {t:'위험', cls:'bad'};
+  }else{
+    const L=card.limit;
+    if(val<=L*0.7) return {t:'좋음', cls:''};
+    if(val<=L) return {t:'양호', cls:''};
+    if(val<=L*1.2) return {t:'주의', cls:'warn'};
+    return {t:'위험', cls:'bad'};
+  }
+}
+function score(card,val){
+  if(card.range){
+    const [a,b]=card.range, mid=(a+b)/2, span=(b-a)/2, d=Math.abs(val-mid);
+    return clamp(100-(d/span)*40,0,100);
+  }else{
+    const L=card.limit, x=val/L;
+    if(x<=.7) return 100;
+    if(x<=1) return 85-(x-.7)*50;
+    if(x<=1.2) return 70-(x-1)*100;
+    return clamp(50-(x-1.2)*120,0,50);
+  }
+}
+function overall(){
+  const w = {pm10:1.2, pm25:1.2, co2:1.1, temp:1, humi:1, noise:.7, wind:.7, lux:.5};
+  let s=0, ws=0; for(const c of CARDS){ const v=S.series[c.key].at(-1); const sc=score(c,v); s+=sc*(w[c.key]||1); ws+=(w[c.key]||1); }
+  return Math.round(s/ws);
+}
+function overallLabel(sc){ 
+  if(sc>=85) return {t:`쾌적 (${sc})`, c:'var(--ok)'};
+  if(sc>=70) return {t:`양호 (${sc})`, c:'var(--warn)'}; 
+  return {t:`주의 (${sc})`, c:'var(--bad)'}; 
+}
+function color(key,a=1){
+  const map={pm10:'#6ce0c8', pm25:'#59c2f6', co2:'#f5c04f', temp:'#f28e70', humi:'#9ae6b4', lux:'#cbb0f8', noise:'#ef9a9a', wind:'#83c8ff'};
+  const hex=map[key]||'#6ce0c8';
+  if(a===1) return hex;
+  const n=parseInt(hex.slice(1),16),R=n>>16&255,G=n>>8&255,B=n&255; return `rgba(${R},${G},${B},${a})`;
+}
+
+/* ===== UI 빌드 ===== */
+function cardHTML(c){
+  return `
+  <div class="card" id="${c.key}-card">
+    <div class="card-head">
+      <div class="bullet">●</div>
+      <div class="name">${c.name}</div>
+      <div class="pill" id="${c.key}-pill">좋음</div>
+    </div>
+    <div class="value-row">
+      <div class="val" id="${c.key}-val">--</div>
+      <div class="unit">${c.unit}</div>
+    </div>
+    <div class="spark-wrap"><canvas class="spark" id="${c.key}-spark"></canvas></div>
+    <div class="actions"><button class="mini" data-graph="${c.key}">그래프</button></div>
+  </div>`;
+}
+function build(){
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  grid.insertAdjacentHTML('beforeend', CARDS.map(cardHTML).join(''));
+  // 종합 평가 바
+  const evalBar = document.createElement('div');
+  evalBar.className='eval';
+  evalBar.innerHTML=`<div class="dot" id="dot"></div><div id="evalText">종합 평가: -</div>`;
+  grid.appendChild(evalBar);
+
+  // 데이터 초기화 & 스파크 차트
+  CARDS.forEach(c=>{
+    const base=c.base, arr=Array.from({length:cfg.points},()=> base + r(-1,1));
+    S.series[c.key]=arr;
+    const ctx=document.getElementById(`${c.key}-spark`);
+    S.charts[c.key]=new Chart(ctx,{
+      type:'line',
+      data:{labels:arr.map((_,i)=>i),
+        datasets:[{data:arr, tension:.35, pointRadius:0, fill:true,
+          borderColor:color(c.key,1), backgroundColor:color(c.key,.18)}]},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}, tooltip:{enabled:false}},
+        scales:{x:{display:false}, y:{display:false}}
+      }
+    });
+  });
+
+  // 핸들러
+  document.querySelectorAll('[data-graph]').forEach(btn=>{
+    btn.addEventListener('click', e=> openModal(e.currentTarget.dataset.graph));
+  });
+  document.getElementById('refresh').onclick=()=> tick();
+
+  renderAll();
+}
+
+/* ===== 갱신 ===== */
+function tick(){
+  CARDS.forEach(c=>{
+    const arr=S.series[c.key]; const last=arr.at(-1);
+    let amt=1;
+    if(c.key==='temp') amt=.18;
+    if(c.key==='humi') amt=.6;
+    if(c.key==='lux')  amt=12;
+    if(c.key==='noise')amt=.8;
+    if(c.key==='wind') amt=.25;
+    if(c.key==='pm10'||c.key==='pm25') amt=.9;
+    if(c.key==='co2') amt=6;
+
+    const min=0;
+    const max = c.key==='lux'? 2000 : c.key==='co2'? 2000 : c.key==='temp'? 35 : c.key==='humi'? 100 : 120;
+    const next = walk(last, amt, min, max);
+    arr.push(next); while(arr.length>cfg.points) arr.shift();
+    S.charts[c.key].update('none');
+  });
+  renderAll();
+}
+function renderAll(){
+  CARDS.forEach(c=>{
+    const v=S.series[c.key].at(-1); 
+    document.getElementById(`${c.key}-val`).textContent=fmt(v);
+    const p=document.getElementById(`${c.key}-pill`); const st=status(c,v);
+    p.textContent=st.t; p.className='pill '+(st.cls||'');
+  });
+  document.getElementById('ts').textContent = new Date().toLocaleString('ko-KR') + ` · ${cfg.updateSec}초 간격 업데이트`;
+  const sc=overall(), lbl=overallLabel(sc);
+  const dot=document.getElementById('dot'); dot.style.background=lbl.c; dot.style.boxShadow=`0 0 12px ${lbl.c}`;
+  document.getElementById('evalText').textContent='종합 평가: '+lbl.t;
+}
+
+/* ===== 모달(큰 그래프) ===== */
+function openModal(key){
+  const card = CARDS.find(c=>c.key===key);
+  const overlay=document.getElementById('overlay'); overlay.style.display='flex';
+  document.getElementById('modalTitle').textContent = `${card.name} · 시간별 추이`;
+
+  const data=[...S.series[key]];
+  const min=Math.min(...data), max=Math.max(...data);
+  const pad=Math.max( (max-min)*0.3, 1 ); // 레인지 패딩
+
+  const ctx=document.getElementById('modalChart').getContext('2d');
+  S.modal && S.modal.destroy();
+  S.modal = new Chart(ctx,{
+    type:'line',
+    data:{labels: data.map((_,i)=>i), datasets:[{
+      label:card.name, data, fill:true, tension:.35, borderColor:color(key,1), backgroundColor:color(key,.18), pointRadius:2
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false, interaction:{mode:'nearest', intersect:false},
+      plugins:{legend:{display:false}, tooltip:{enabled:true}},
+      scales:{x:{ticks:{color:'#bcd1cb'}}, y:{min:Math.max(0,min-pad), max:max+pad, ticks:{color:'#bcd1cb'}}}
+    }
+  });
+}
+document.getElementById('btnClose').onclick=()=> document.getElementById('overlay').style.display='none';
+document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') document.getElementById('overlay').style.display='none'; });
+
+/* ===== 시작 ===== */
+build();
+setInterval(tick, cfg.updateSec*1000);
+</script>
+</body>
+</html>
