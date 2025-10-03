@@ -1,469 +1,438 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>디지털 치유정원 · 실시간 환경 대시보드</title>
-<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <style>
-:root{
-  --bg:#0f1714;
-  --panel:#121d19;
-  --panel-2:#0d1512;
-  --border:#1f2d28;
-  --text:#e9f5ef;
-  --muted:#99b2a8;
-  --accent:#9BE7C4;
-  --accent-2:#5ED7A6;
-  --warn:#ffd166;
-  --bad:#ff6b6b;
-  --good:#92f0ba;
-  --shadow:0 10px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
-}
-
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background: radial-gradient(1000px 600px at 10% -20%, #12211c 0%, #0f1714 60%) , var(--bg);
-  color:var(--text);
-  font-family: "Pretendard","Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-}
-
-.container{max-width:1280px; margin:24px auto; padding:0 16px}
-
-.header{
-  display:flex; align-items:flex-end; justify-content:space-between;
-  gap:12px; margin-bottom:18px;
-}
-.title{
-  font-size:34px; font-weight:800; letter-spacing:.2px;
-  text-shadow:0 1px 0 rgba(0,0,0,.5);
-}
-.time{
-  font-size:14px; color:var(--muted);
-}
-
-.grid{
-  display:grid; grid-template-columns: repeat(12, 1fr);
-  gap:14px;
-}
-
-/* Card base */
-.card{
-  background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-  border:1px solid var(--border);
-  border-radius:16px; box-shadow:var(--shadow);
-  position:relative; overflow:hidden;
-  padding:16px 16px 12px 16px;
-  min-height:146px;
-}
-
-.card .top{
-  display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;
-}
-.card .label{
-  display:flex; align-items:center; gap:8px; color:var(--muted); font-weight:600;
-}
-.badge{
-  font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid var(--border);
-  background:#13251f; color:var(--good);
-}
-.badge.warn{ background:#322a12; color:var(--warn) }
-.badge.bad { background:#2d1414; color:var(--bad) }
-
-.value{ font-size:36px; font-weight:800; letter-spacing:.5px; }
-.unit{ font-size:18px; color:var(--muted); margin-left:6px}
-
-.spark{ height:120px; }
-
-.btn{
-  cursor:pointer; font-size:13px; padding:6px 10px; border-radius:10px;
-  border:1px solid var(--border); background:transparent; color:var(--text);
-  transition:all .2s ease;
-}
-.btn:hover{ transform:translateY(-1px); border-color:#2d3f37; }
-
-.col-3{ grid-column: span 3; }
-.col-4{ grid-column: span 4; }
-.col-6{ grid-column: span 6; }
-.col-12{ grid-column: span 12; }
-
-/* Modal */
-.modal{
-  position:fixed; inset:0; display:none; place-items:center;
-  background:rgba(0,0,0,.55); z-index:50;
-}
-.modal.on{ display:grid }
-.dialog{
-  width:min(70vw,960px); height:60vh; background:var(--panel);
-  border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); padding:16px;
-  display:flex; flex-direction:column; gap:10px;
-}
-.dialog .head{ display:flex; justify-content:space-between; align-items:center }
-.dialog h3{ margin:0; font-size:18px }
-.dialog canvas{ flex:1; background:transparent !important }
-.close{ background:#182721; border:1px solid var(--border); color:var(--text); padding:6px 10px; border-radius:10px; cursor:pointer }
-
-/* Overall grade bar */
-.grade{
-  display:flex; align-items:center; gap:8px;
-  background:linear-gradient(90deg, #0f241d 0%, #0f1916 100%);
-  border:1px solid var(--border); border-radius:14px; padding:10px 12px; box-shadow:var(--shadow);
-  color:var(--text);
-}
-.dot{ width:8px; height:8px; border-radius:50%; background:var(--good) }
-
-footer{
-  margin:14px 0 30px 0; color:var(--muted); font-size:12px; text-align:center;
-}
-
-/* Responsive */
-@media (max-width: 1100px){
-  .col-4{ grid-column: span 6 }
-  .col-3{ grid-column: span 6 }
-  .col-6{ grid-column: span 12 }
-}
-@media (max-width: 680px){
-  .title{ font-size:26px }
-  .grid{ gap:12px }
-  .col-3,.col-4,.col-6{ grid-column: span 12 }
-}
+  :root{
+    --bg:#0f1614;
+    --panel:#111b18;
+    --card:#11201b;
+    --card-border:rgba(255,255,255,.06);
+    --muted:#9eb6ad;
+    --heading:#e7f2ef;
+    --text:#d4e6e1;
+    --chip-good:#2e7d32;   /* 좋음 */
+    --chip-fair:#377c6b;   /* 양호 */
+    --chip-warn:#bf7e1a;   /* 주의 */
+    --chip-bad:#b23a3a;    /* 위험 */
+    --accent:#67d1a4;      /* 포인트 */
+    --shadow: 0 8px 28px rgba(0,0,0,.35);
+    --radius:20px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #123428 0%, transparent 60%),
+      radial-gradient(1100px 700px at 100% -20%, #0e2a22 0%, transparent 65%),
+      var(--bg);
+    color:var(--text);
+    font-family: 'Nanum Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    letter-spacing:.1px;
+  }
+  .page{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  header{
+    padding:28px 28px 10px;
+  }
+  .title-row{
+    display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;
+  }
+  h1{
+    margin:0;
+    font-weight:800;
+    font-size:42px;
+    color:var(--heading);
+    text-shadow:0 4px 20px rgba(0,0,0,.35);
+  }
+  .meta{
+    font-size:15px;
+    color:var(--muted);
+  }
+  .refresh{
+    margin-left:auto;
+    background:linear-gradient(135deg,#69e0b0,#34c69b);
+    color:#05251c;
+    border:0; border-radius:999px;
+    padding:10px 16px; font-weight:700; cursor:pointer;
+    box-shadow:var(--shadow);
+  }
+  .grid{
+    padding:20px 28px 18px;
+    display:grid; gap:16px;
+    /* 1920×1080 기준 4x2 타일로 꽉 차는 레이아웃 */
+    grid-template-columns: repeat(4, minmax(240px, 1fr));
+  }
+  .card{
+    position:relative;
+    background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35));
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    box-shadow: var(--shadow);
+    padding:22px;
+    height:260px;            /* 세로 과도 확장 방지 */
+    display:flex; flex-direction:column; justify-content:space-between;
+    overflow:hidden;
+  }
+  .card::after{
+    /* 구름/가지 느낌의 은은한 장식 */
+    content:""; position:absolute; inset:auto -40% -35% -40%; height:160px;
+    background: radial-gradient(60% 120% at 50% 100%, rgba(103,209,164,.25), transparent 45%);
+    pointer-events:none;
+  }
+  .kicker{display:flex; align-items:center; gap:10px; color:var(--muted); font-weight:700;}
+  .kicker .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); opacity:.75;}
+  .value-row{display:flex; align-items:baseline; gap:12px}
+  .value{font-size:48px; font-weight:800; color:#eaf9f4; letter-spacing:.5px}
+  .unit{font-size:20px; color:var(--muted)}
+  .badge{
+    position:absolute; top:18px; right:18px;
+    font-size:14px; font-weight:700; padding:6px 10px;
+    border-radius:999px; background:#164337; border:1px solid rgba(255,255,255,.06); color:#cde7de;
+  }
+  .badge.good{background:rgba(46,125,50,.22); color:#bdf4c9; border-color:rgba(189,244,201,.2)}
+  .badge.fair{background:rgba(55,124,107,.22); color:#cfeee6}
+  .badge.warn{background:rgba(191,126,26,.22); color:#ffe2b8}
+  .badge.bad{ background:rgba(178,58,58,.22); color:#ffc7c7}
+  .btn-graph{
+    align-self:flex-end;
+    background:transparent; color:#cfeee6; border:1px dashed rgba(207,238,230,.45);
+    border-radius:12px; padding:8px 12px; cursor:pointer;
+  }
+  /* 종합평가 */
+  .summary{
+    margin:8px 28px 24px;
+    background:linear-gradient(90deg,rgba(103,209,164,.15),rgba(14,53,42,.35));
+    border:1px solid var(--card-border); border-radius:14px; padding:12px 16px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .light{width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 18px var(--accent)}
+  .summary strong{color:#eaf9f4}
+  /* Modal */
+  .modal{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:50}
+  .modal.open{display:flex}
+  .dialog{
+    width:min(1200px,70vw); height:min(720px,70vh);
+    background:linear-gradient(180deg,#0f1916,#0c1613);
+    border:1px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column;
+  }
+  .dialog header{padding:16px 18px; display:flex; align-items:center; gap:10px;}
+  .dialog h3{margin:0; font-size:18px; color:#dff3ed}
+  .dialog .sp{flex:1}
+  .dialog .close{background:transparent; color:#b7d7cf; border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:10px; cursor:pointer}
+  .dialog .canvas-wrap{flex:1; padding:10px 16px 18px}
+  canvas{width:100%; height:100%}
+  /* Footer with 국립정원문화원 */
+  footer{border-top:1px solid rgba(255,255,255,.06); padding:18px 24px; display:flex; justify-content:center; background:transparent;}
+  .footer-inner{display:flex; align-items:center; gap:12px; color:#BFD3D8; font-size:14px; line-height:1.4; opacity:.9;}
+  .footer-logo{height:22px; width:auto; display:block}
+  @media (max-width:1200px){
+    .grid{grid-template-columns: repeat(2, minmax(240px, 1fr));}
+  }
+  @media (max-width:620px){
+    h1{font-size:30px}
+    .grid{grid-template-columns: 1fr}
+  }
 </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="title">디지털 치유정원 · 실시간 환경 대시보드</div>
-      <div class="time" id="now">-</div>
+<div class="page">
+  <header>
+    <div class="title-row">
+      <h1>디지털 치유정원 · 실시간 환경 대시보드</h1>
+      <div class="meta" id="nowTxt"></div>
+      <button class="refresh" id="btnRefresh">지금 새로고침</button>
     </div>
+  </header>
 
-    <!-- 8 metric cards -->
-    <section class="grid">
-      <!-- PM10 -->
-      <article class="card col-3" data-key="pm10">
-        <div class="top">
-          <div class="label">🌫️ PM10</div>
-          <span class="badge" id="pm10-badge">양호</span>
-        </div>
-        <div><span class="value" id="pm10-val">--</span><span class="unit">µg/m³</span></div>
-        <div class="spark"><canvas id="pm10-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="pm10">그래프</button></div>
-      </article>
+  <main class="grid" id="grid">
+    <!-- 카드들은 JS로 렌더링 -->
+  </main>
 
-      <!-- PM2.5 -->
-      <article class="card col-3" data-key="pm25">
-        <div class="top">
-          <div class="label">🌁 PM2.5</div>
-          <span class="badge" id="pm25-badge">양호</span>
-        </div>
-        <div><span class="value" id="pm25-val">--</span><span class="unit">µg/m³</span></div>
-        <div class="spark"><canvas id="pm25-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="pm25">그래프</button></div>
-      </article>
+  <section class="summary" id="summaryBar">
+    <div class="light"></div>
+    <div id="summaryText">종합 평가 계산 중…</div>
+  </section>
 
-      <!-- CO2 -->
-      <article class="card col-3" data-key="co2">
-        <div class="top">
-          <div class="label">🟦 CO₂</div>
-          <span class="badge" id="co2-badge">양호</span>
-        </div>
-        <div><span class="value" id="co2-val">--</span><span class="unit">ppm</span></div>
-        <div class="spark"><canvas id="co2-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="co2">그래프</button></div>
-      </article>
-
-      <!-- Temperature -->
-      <article class="card col-3" data-key="temp">
-        <div class="top">
-          <div class="label">🌡️ 온도</div>
-          <span class="badge" id="temp-badge">양호</span>
-        </div>
-        <div><span class="value" id="temp-val">--</span><span class="unit">℃</span></div>
-        <div class="spark"><canvas id="temp-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="temp">그래프</button></div>
-      </article>
-
-      <!-- Humidity -->
-      <article class="card col-3" data-key="humi">
-        <div class="top">
-          <div class="label">💧 습도</div>
-          <span class="badge" id="humi-badge">양호</span>
-        </div>
-        <div><span class="value" id="humi-val">--</span><span class="unit">%RH</span></div>
-        <div class="spark"><canvas id="humi-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="humi">그래프</button></div>
-      </article>
-
-      <!-- Illuminance -->
-      <article class="card col-3" data-key="lux">
-        <div class="top">
-          <div class="label">💡 조도</div>
-          <span class="badge" id="lux-badge">양호</span>
-        </div>
-        <div><span class="value" id="lux-val">--</span><span class="unit">lux</span></div>
-        <div class="spark"><canvas id="lux-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="lux">그래프</button></div>
-      </article>
-
-      <!-- Noise -->
-      <article class="card col-3" data-key="noise">
-        <div class="top">
-          <div class="label">🔈 소음</div>
-          <span class="badge" id="noise-badge">양호</span>
-        </div>
-        <div><span class="value" id="noise-val">--</span><span class="unit">dB</span></div>
-        <div class="spark"><canvas id="noise-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="noise">그래프</button></div>
-      </article>
-
-      <!-- Wind -->
-      <article class="card col-3" data-key="wind">
-        <div class="top">
-          <div class="label">🍃 풍속</div>
-          <span class="badge" id="wind-badge">양호</span>
-        </div>
-        <div><span class="value" id="wind-val">--</span><span class="unit">m/s</span></div>
-        <div class="spark"><canvas id="wind-chart"></canvas></div>
-        <div style="display:flex; justify-content:flex-end"><button class="btn" data-modal="wind">그래프</button></div>
-      </article>
-
-      <!-- Overall grade -->
-      <article class="card col-12">
-        <div class="grade"><span class="dot"></span>
-          <div id="grade-text">종합 평가 계산 중…</div>
-          <div style="margin-left:auto"><button class="btn" id="refresh">지금 새로고침</button></div>
-        </div>
-      </article>
-    </section>
-
-    
-<footer style="width:100%;display:flex;justify-content:center;align-items:center;gap:.6rem;margin-top:16px;opacity:.85;">
-  <img src="data:image/png;base64,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" alt="한국수목원정원관리원 로고" style="height:20px;vertical-align:middle;filter:drop-shadow(0 0 0 rgba(0,0,0,.0));" />
-  <span>· Healing Garden · Dark Forest UI (single-file demo)</span>
-</footer>
-
-  </div>
-
-  <!-- Modal (shared) -->
+  <!-- Modal for charts -->
   <div class="modal" id="modal">
-    <div class="dialog">
-      <div class="head">
-        <h3 id="modal-title">그래프</h3>
-        <button class="close" id="close">닫기</button>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <header>
+        <h3 id="modalTitle">그래프</h3>
+        <div class="sp"></div>
+        <button class="close" id="btnClose">닫기</button>
+      </header>
+      <div class="canvas-wrap">
+        <canvas id="chartCanvas"></canvas>
       </div>
-      <canvas id="modal-canvas"></canvas>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer role="contentinfo" aria-label="footer">
+    <div class="footer-inner">
+      <img class="footer-logo" alt="국립정원문화원 로고"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANEAAAAjCAYAAAArw2p/AAAACXBIWXMAAAsSAAALEgHS3X78AAABc0lEQVR4nO3bS44SURSG4f8g3Czq9v2Jf9Qb1x0t8ySxvFJ4o3C1J2gqL1w7bN2QvJ1p3YQK1pQ0vVY7yQb3yqk2mJvFqj9Q0yS6n4z0Yt7cJm8+3y9kDE7n3bC7d3sQp7r9p9n4l2V1h3kW5m8R3uQ3i5f2BvQk/n3r6gQ3YlqQ1Q0C6mG1j5VQ2kq2A3m7Jp4mW1GkM5dTgO0d0WZ8HcG3mX8s6Xl1n6x0y2C4b5f7cWc0O6M8l8b8n8e5b3G0Sg0l4XfP8xJbQj3N8q6cE3fS6HkB5iXk2q9c0N6D8g9qQ0n9g5qG2Zk8m3bUQq2i6o8j7r9P6Rk+o3t8l2j8bQ5rQ8M8o8b8u8n8fZqWq6g6a8OZg2u8Ww0AAAAAElFTkSuQmCC" />
+      <span>국립정원문화원 · Healing Garden · Dark Forest UI (single-file demo)</span>
+    </div>
+  </footer>
+</div>
 
 <script>
-// ========= Utilities =========
-const $ = (sel, root=document) => root.querySelector(sel);
-const nowEl = document.getElementById('now');
-function tickNow(){
+/* -------------------------------
+   구성 & 상태
+-------------------------------- */
+const METRICS = [
+  { key:'pm10',  name:'PM10', unit:'µg/m³',  range:[0,120],   good:30,  fair:50,  warn:80 },
+  { key:'pm25',  name:'PM2.5',unit:'µg/m³',  range:[0,80],    good:15,  fair:30,  warn:50 },
+  { key:'co2',   name:'CO₂',  unit:'ppm',   range:[350,1500],good:700, fair:1000,warn:1400},
+  { key:'temp',  name:'온도',  unit:'℃',     range:[-5,35],   good:26,  fair:28,  warn:30,  invert:true },
+  { key:'humi',  name:'습도',  unit:'%RH',   range:[0,100],   good:[40,60], fair:[35,65], warn:[30,70], band:true },
+  { key:'lux',   name:'조도',  unit:'lux',   range:[0,1500],  good:1000,fair:700, warn:400 },
+  { key:'noise', name:'소음',  unit:'dB',    range:[30,85],   good:60,  fair:70,  warn:80,  invert:true },
+  { key:'wind',  name:'풍속',  unit:'m/s',   range:[0,10],    good:5,   fair:7,   warn:9,   invert:true },
+];
+
+const HISTORY_LEN = 120;         // 약 60분(30s x 120)
+const UPDATE_MS   = 30_000;      // 30초 간격
+const STATE = {};                // { metricKey: { value:number, history:[{t,v},..] } }
+
+/* -------------------------------
+   유틸
+-------------------------------- */
+const $ = (sel, el=document)=> el.querySelector(sel);
+function nowString(){
   const d = new Date();
-  const s = d.toLocaleString('ko-KR', { year:'numeric', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  nowEl.textContent = s + ' 기준 · 30초 간격 업데이트';
+  return d.toLocaleString('ko-KR', {dateStyle:'medium', timeStyle:'medium'});
 }
-setInterval(tickNow, 1000); tickNow();
-
-// ========= Data ranges & gentle drift =========
-const METAS = {
-  pm10 : {label:'PM10', unit:'µg/m³', min:15, max:60, start:33, green:[0,50], yellow:[50,80], red:[80,200]},
-  pm25 : {label:'PM2.5', unit:'µg/m³', min:10, max:35, start:19, green:[0,35], yellow:[35,60], red:[60,200]},
-  co2  : {label:'CO₂', unit:'ppm',  min:380, max:800, start:520, green:[0,800], yellow:[800,1000], red:[1000,3000]},
-  temp : {label:'온도', unit:'℃',   min:14, max:28, start:22.5, green:[18,27], yellow:[15,18], red:[0,15]},
-  humi : {label:'습도', unit:'%RH', min:35, max:75, start:55, green:[40,65], yellow:[30,40], red:[0,30]},
-  lux  : {label:'조도', unit:'lux', min:120, max:1000,start:480, green:[200,800], yellow:[120,200], red:[0,120]},
-  noise: {label:'소음', unit:'dB',  min:38, max:70, start:52, green:[0,55], yellow:[55,65], red:[65,120]},
-  wind : {label:'풍속', unit:'m/s', min:0.2, max:6, start:1.2, green:[0,4], yellow:[4,5], red:[5,12]}
-};
-
-// Keep history of 120 points per metric
-const HIST = {};
-const CHARTS = {};
-const modal = $('#modal'); const modalTitle = $('#modal-title');
-let modalChart;
-const modalCanvas = document.getElementById('modal-canvas');
-
-function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
-function initHistory(){
-  for(const k in METAS){
-    HIST[k] = [];
-    let v = METAS[k].start;
-    for(let i=0;i<60;i++){
-      v = drift(k, v, true);
-      HIST[k].push(v);
-    }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function gentleStep(prev, step, min, max){
+  const delta = (Math.random()*2 - 1) * step;
+  return clamp(prev + delta, min, max);
+}
+function statusOf(metric, v){
+  // 밴드(습도) or 일반/invert
+  if(metric.band){
+    const [g1,g2]=metric.good, [f1,f2]=metric.fair, [w1,w2]=metric.warn;
+    if(v>=g1 && v<=g2) return 'good';
+    if(v>=f1 && v<=f2) return 'fair';
+    if(v>=w1 && v<=w2) return 'warn';
+    return 'bad';
+  }
+  if(metric.invert){ // 값 낮을수록 좋음
+    if(v<=metric.good) return 'good';
+    if(v<=metric.fair) return 'fair';
+    if(v<=metric.warn) return 'warn';
+    return 'bad';
+  }else{
+    if(v<=metric.good) return 'good';
+    if(v<=metric.fair) return 'fair';
+    if(v<=metric.warn) return 'warn';
+    return 'bad';
   }
 }
+const STATUS_TEXT = {good:'좋음', fair:'양호', warn:'주의', bad:'위험'};
+const STATUS_ORDER = {good:0,fair:1,warn:2,bad:3};
 
-function drift(key, prev, init=false){
-  // gentle drift with very small steps; occasional 10분에 1번 정도 미니-스파이크
-  const m = METAS[key];
-  const step = (m.max - m.min) * 0.003; // 작은 변화
-  const jitter = (Math.random()*step*2 - step);
-  let v = prev + jitter;
-  // soft pull toward comfortable center to avoid runaway
-  const center = (m.green[0] + (m.green[1] ?? m.green[0]))/2;
-  v += (center - v) * 0.01;
-
-  // rare spike
-  if(!init && Math.random() < 1/600){ // ~10분에 1번
-    v += (m.max - m.min) * (Math.random()<0.5 ? 0.04 : -0.04);
+/* -------------------------------
+   초기 데이터 생성 (온화한 가을 기준)
+-------------------------------- */
+function initValue(metric){
+  switch(metric.key){
+    case 'pm10':  return 25 + Math.random()*10;        // 20~35
+    case 'pm25':  return 12 + Math.random()*8;         // 12~20
+    case 'co2':   return 480 + Math.random()*120;      // 480~600
+    case 'temp':  return 17 + Math.random()*3;         // 17~20
+    case 'humi':  return 48 + Math.random()*10;        // 48~58
+    case 'lux':   return 400 + Math.random()*200;      // 400~600
+    case 'noise': return 48 + Math.random()*8;         // 48~56
+    case 'wind':  return 0.8 + Math.random()*0.9;      // 0.8~1.7
+    default:      return 0;
   }
-  return clamp(v, m.min, m.max);
 }
-
-function badgeState(key, val){
-  const m = METAS[key];
-  const g = m.green; const y = m.yellow; const r = m.red;
-  let text = '양호', cls='';
-  if(val >= r[0] && val < (r[1] ?? Infinity)){ text='위험'; cls='bad'; }
-  else if(val >= y[0] && val < (y[1] ?? Infinity)){ text='주의'; cls='warn'; }
-  else { text='양호'; cls=''; }
-  return {text, cls};
-}
-
-function setBadge(key, val){
-  const b = document.getElementById(key+'-badge');
-  const {text, cls} = badgeState(key, val);
-  b.textContent = text;
-  b.className = 'badge' + (cls ? ' ' + (cls==='bad'?'bad':'warn') : '');
-}
-
-function createSpark(id, key){
-  const ctx = document.getElementById(id);
-  const m = METAS[key];
-  const data = {
-    labels:Array(HIST[key].length).fill(''),
-    datasets:[{
-      data:HIST[key],
-      borderColor:key==='co2' ? '#ffd166' :
-                  key==='pm10'? '#66e2b3' :
-                  key==='pm25'? '#98f5cd' :
-                  key==='temp'? '#8cd4ff' :
-                  key==='humi'? '#7ee6d3' :
-                  key==='lux' ? '#74f0a6' :
-                  key==='noise'? '#f194ff' : '#9BE7C4',
-      backgroundColor:'rgba(155,231,196,.12)',
-      tension:.35, fill:true, pointRadius:0, borderWidth:2
-    }]
-  };
-  const options = {
-    responsive:true, maintainAspectRatio:false,
-    scales:{
-      x:{ display:false },
-      y:{ display:false, suggestedMin:m.min, suggestedMax:m.max }
-    },
-    plugins:{ legend:{display:false}, tooltip:{enabled:true, mode:'nearest', intersect:false} },
-    animation:false
-  };
-  CHARTS[key] = new Chart(ctx, {type:'line', data, options});
-}
-
-function refreshNumbers(){
-  for(const k in METAS){
-    const arr = HIST[k]; const val = arr[arr.length-1];
-    const vEl = document.getElementById(k+'-val');
-    vEl.textContent = (k==='temp'||k==='wind') ? val.toFixed(1) : Math.round(val);
-    setBadge(k, val);
+function stepSize(metric){
+  switch(metric.key){
+    case 'pm10':  return 2.2;
+    case 'pm25':  return 1.5;
+    case 'co2':   return 15;
+    case 'temp':  return 0.25;
+    case 'humi':  return 1.2;
+    case 'lux':   return 30;
+    case 'noise': return 1.0;
+    case 'wind':  return 0.15;
+    default:      return 1;
   }
-  // grade
-  const score = computeScore();
-  const text = scoreToText(score);
-  $('#grade-text').textContent = `종합 평가: ${text} (점수 ${Math.round(score)}/100)`;
+}
+function initState(){
+  METRICS.forEach(m=>{
+    const v = initValue(m);
+    STATE[m.key] = { value:v, history:[{t:Date.now(), v}] };
+  });
 }
 
-function computeScore(){
-  // Normalize to 0..100 (100 best)
-  let s = 0, n=0;
-  for(const k in METAS){
-    const v = HIST[k][HIST[k].length-1];
-    const m = METAS[k];
-    let part=80; // base
-    // penalty if outside green
-    if(v < m.green[0] || v > m.green[1]){
-      part -= 20;
-    }
-    // penalty for yellow/red
-    if(v >= m.yellow[0] && v < (m.yellow[1] ?? Infinity)) part -= 10;
-    if(v >= m.red[0] && v < (m.red[1] ?? Infinity)) part -= 25;
-    part = clamp(part, 10, 100);
-    s += part; n++;
-  }
-  return s/n;
+/* -------------------------------
+   DOM 렌더
+-------------------------------- */
+function cardHTML(m){
+  return `
+  <article class="card" data-key="${m.key}" tabindex="0" role="button" aria-label="${m.name} 카드 (그래프 보기)">
+    <div class="kicker"><span class="dot"></span><span>${m.name}</span></div>
+    <div>
+      <div class="value-row">
+        <span class="value" id="${m.key}-val">--</span>
+        <span class="unit">${m.unit}</span>
+      </div>
+    </div>
+    <button class="btn-graph" data-graph="${m.key}">그래프</button>
+    <span class="badge" id="${m.key}-badge">--</span>
+  </article>`;
 }
-function scoreToText(s){
-  if(s >= 85) return '매우 쾌적';
-  if(s >= 70) return '쾌적';
-  if(s >= 55) return '보통';
-  if(s >= 40) return '주의 필요';
-  return '위험';
-}
-
-// Periodic updater
-function stepUpdate(){
-  for(const k in METAS){
-    const last = HIST[k][HIST[k].length-1];
-    const nv = drift(k, last);
-    HIST[k].push(nv); if(HIST[k].length>120) HIST[k].shift();
-    const m = METAS[k];
-    const ch = CHARTS[k];
-    ch.data.datasets[0].data = HIST[k];
-    ch.options.scales.y.suggestedMin = m.min;
-    ch.options.scales.y.suggestedMax = m.max;
-    ch.update('none');
-  }
-  refreshNumbers();
+function renderGrid(){
+  const tpl = METRICS.map(cardHTML).join('');
+  $('#grid').innerHTML = tpl;
+  // 클릭(카드 전체 또는 버튼)
+  $('#grid').addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-graph]');
+    const card = e.target.closest('.card');
+    if(btn){ openModal(btn.dataset.graph); }
+    else if(card){ openModal(card.dataset.key); }
+  });
 }
 
-function openModal(key){
-  modal.classList.add('on');
-  modalTitle.textContent = `${METAS[key].label} 추이`;
-  if(modalChart){ modalChart.destroy(); }
-  const data = {
-    labels: Array(HIST[key].length).fill(''),
-    datasets:[{
-      data: HIST[key],
-      borderColor:'#9BE7C4', backgroundColor:'rgba(155,231,196,.1)',
-      tension:.3, fill:true, pointRadius:0, borderWidth:2
-    }]
-  };
-  const m = METAS[key];
-  modalChart = new Chart(modalCanvas, {
+/* 값/뱃지 업데이트 */
+function updateCards(){
+  METRICS.forEach(m=>{
+    const st = STATE[m.key];
+    $('#'+m.key+'-val').textContent = formatValue(m, st.value);
+    const s = statusOf(m, st.value);
+    const badge = $('#'+m.key+'-badge');
+    badge.textContent = STATUS_TEXT[s];
+    badge.className = 'badge '+s;
+  });
+}
+function formatValue(m, v){
+  if(m.key==='wind')  return v.toFixed(1);
+  if(m.key==='temp')  return v.toFixed(1);
+  if(m.key==='noise') return Math.round(v);
+  if(m.key==='co2')   return Math.round(v);
+  if(m.key==='lux')   return Math.round(v);
+  return Math.round(v);
+}
+
+/* -------------------------------
+   주기 업데이트 & 종합평가
+-------------------------------- */
+function tick(){
+  METRICS.forEach(m=>{
+    const st = STATE[m.key];
+    const [min,max] = m.range;
+    st.value = gentleStep(st.value, stepSize(m), min, max);
+    st.history.push({t: Date.now(), v: st.value});
+    if(st.history.length > HISTORY_LEN) st.history.shift();
+  });
+  updateCards();
+  updateSummary();
+  $('#nowTxt').textContent = `${new Date().toLocaleString('ko-KR')} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
+}
+function updateSummary(){
+  // 가장 나쁜 상태(순위) 체크 후 문구 생성
+  let worst = 'good';
+  const parts = [];
+  METRICS.forEach(m=>{
+    const s = statusOf(m, STATE[m.key].value);
+    if(STATUS_ORDER[s] > STATUS_ORDER[worst]) worst = s;
+    parts.push(`${m.name}:${STATUS_TEXT[s]}`);
+  });
+  const overall =
+    worst==='good' ? '쾌적'
+    : worst==='fair' ? '양호'
+    : worst==='warn' ? '주의'
+    : '경고';
+  $('#summaryText').innerHTML = `<strong>종합 평가: ${overall}</strong> · ${parts.join(' · ')}`;
+}
+
+/* -------------------------------
+   모달 그래프
+-------------------------------- */
+let chart, chartMetric;
+function openModal(metricKey){
+  chartMetric = METRICS.find(m=> m.key===metricKey);
+  $('#modalTitle').textContent = `${chartMetric.name} 시간 추이`;
+  $('#modal').classList.add('open');
+  renderChart(chartMetric);
+}
+$('#btnClose').onclick=()=> $('#modal').classList.remove('open');
+
+function renderChart(m){
+  const ctx = $('#chartCanvas');
+  if(chart){ chart.destroy(); }
+  const labels = STATE[m.key].history.map(h => new Date(h.t).toLocaleTimeString('ko-KR',{hour:'2-digit', minute:'2-digit'}));
+  const data = STATE[m.key].history.map(h => h.v);
+
+  const [ymin,ymax] = m.range;         // y축 고정 → 지나친 증폭 방지
+  const color = '#7fe3bd';
+
+  chart = new Chart(ctx, {
     type:'line',
-    data,
+    data:{
+      labels,
+      datasets:[{
+        label: `${m.name}`,
+        data,
+        borderColor: color,
+        backgroundColor: 'rgba(127,227,189,.18)',
+        tension:.25, fill:true, pointRadius:0, borderWidth:2
+      }]
+    },
     options:{
-      responsive:true, maintainAspectRatio:false,
-      scales:{
-        x:{display:false},
-        y:{display:true, ticks:{color:'#9fb7ae'}, grid:{color:'rgba(255,255,255,.06)'},
-           suggestedMin:m.min, suggestedMax:m.max}
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{mode:'index', intersect:false}
       },
-      plugins:{legend:{display:false}},
-      animation:false
+      scales:{
+        x:{
+          ticks:{ color:'#a9c9c0' },
+          grid:{ color:'rgba(255,255,255,.06)'}
+        },
+        y:{
+          min:ymin, max:ymax,
+          ticks:{ color:'#a9c9c0' },
+          grid:{ color:'rgba(255,255,255,.06)'}
+        }
+      }
     }
   });
 }
 
-function bind(){
-  document.querySelectorAll('.btn[data-modal]').forEach(btn=>{
-    btn.addEventListener('click', e=> openModal(btn.dataset.modal));
-  });
-  $('#close').addEventListener('click', ()=> modal.classList.remove('on'));
-  modal.addEventListener('click', e=>{ if(e.target===modal) modal.classList.remove('on'); });
-  $('#refresh').addEventListener('click', stepUpdate);
-}
+/* -------------------------------
+   초기화
+-------------------------------- */
+initState();
+renderGrid();
+updateCards();
+updateSummary();
+$('#nowTxt').textContent = `${nowString()} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
 
-// Init
-initHistory();
-['pm10','pm25','co2','temp','humi','lux','noise','wind'].forEach(k=> createSpark(k+'-chart', k));
-refreshNumbers(); bind();
+let timer = setInterval(tick, UPDATE_MS);
+$('#btnRefresh').onclick = ()=>{ tick(); };
 
-// periodic 30s
-setInterval(stepUpdate, 30000);
+/* 접근성: ESC로 모달 닫기 */
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') $('#modal').classList.remove('open'); });
 </script>
 </body>
 </html>
