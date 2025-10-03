@@ -14,7 +14,7 @@
 html,body{height:100%}
 body{
   margin:0; color:var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
   background:
     radial-gradient(1200px 600px at 15% -10%, #123428 0%, transparent 60%),
     radial-gradient(1100px 700px at 100% -20%, #0e2a22 0%, transparent 65%),
@@ -28,8 +28,7 @@ h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:
 .actions{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
 .btn{
   background:linear-gradient(135deg,#69e0b0,#34c69b);
-  color:#05251c; border:0; border-radius:999px; padding:10px 16px; font-weight:800;
-  cursor:pointer; box-shadow:var(--shadow); letter-spacing:.2px
+  color:#05251c; border:0; border-radius:999px; padding:10px 16px; font-weight:800; cursor:pointer; box-shadow:var(--shadow)
 }
 .btn.secondary{background:transparent; color:#d6ece6; border:1px solid rgba(214,236,230,.35)}
 .grid{padding:20px 28px 18px; display:grid; gap:16px; grid-template-columns:repeat(4,minmax(240px,1fr))}
@@ -40,8 +39,8 @@ h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:
 }
 .card::after{content:""; position:absolute; inset:auto -40% -35% -40%; height:160px;
   background:radial-gradient(60% 120% at 50% 100%, rgba(103,209,164,.22), transparent 45%); pointer-events:none}
-.kicker{display:flex; align-items:center; gap:10px; color:#d6ece6; font-weight:800; font-size:22px}
-.kicker .dot{width:10px; height:10px; border-radius:50%; background:var(--accent); opacity:.85}
+.kicker{display:flex; align-items:center; gap:10px; color:#d6ece6; font-weight:900; font-size:26px} /* ← 2배 키움 */
+.kicker .dot{width:12px; height:12px; border-radius:50%; background:var(--accent); opacity:.85}
 .value-row{display:flex; align-items:baseline; gap:12px; margin:8px 0 10px}
 .value{font-size:44px; font-weight:800; color:#eaf9f4; letter-spacing:.5px}
 .unit{font-size:18px; color:var(--muted)}
@@ -50,19 +49,13 @@ h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:
 .badge.good{background:rgba(46,125,50,.22); color:#bdf4c9; border-color:rgba(189,244,201,.2)}
 .badge.fair{background:rgba(55,124,107,.22); color:#cfeee6}
 .badge.warn{background:rgba(191,126,26,.22); color:#ffe2b8}
-.badge.bad{ background:rgba(178,58,58,.22); color:#ffc7c7}
+.badge.bad {background:rgba(178,58,58,.22); color:#ffc7c7}
 .minititle{font-size:12px; color:var(--muted); margin:0 0 6px 2px}
-.mini{
-  flex:1; min-height:95px;
-  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
-  border:2px solid rgba(255,255,255,.85); border-radius:12px; padding:6px; overflow:hidden;
-  display:flex; align-items:center; justify-content:center; color:#9eb6ad; font-size:12px;
-}
+.mini{flex:1; min-height:95px; background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+  border:2px solid rgba(255,255,255,.85); border-radius:12px; padding:6px; overflow:hidden; display:flex; align-items:center; justify-content:center}
 .btn-graph{margin-top:8px; align-self:flex-end; font-weight:800; font-size:12px;
   background:transparent; color:#d6ece6; border:1px solid rgba(255,255,255,.28); border-radius:12px; padding:6px 10px; cursor:pointer}
 .btn-graph:hover{background:rgba(255,255,255,.06)}
-
-/* 모달/오버레이 */
 .modal,.overlay{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:50}
 .modal.open,.overlay.open{display:flex}
 .modal{background:rgba(0,0,0,.55)}
@@ -77,213 +70,11 @@ h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:
 .dialog h3,.board h3{margin:0; font-size:18px; color:#dff3ed}
 .dialog .sp,.board .sp{flex:1}
 .close{background:transparent; color:#b7d7cf; border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:10px; cursor:pointer}
-.canvas-wrap{flex:1; padding:10px 16px 18px}
+.canvas-wrap{flex:1; padding:10px 16px 18px; position:relative}
+#chartTip{position:absolute; display:none; padding:6px 8px; border-radius:8px; background:rgba(0,0,0,.7); color:#e7f2ef; font-size:12px; pointer-events:none}
 .tiles{flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:10px 14px}
 .tile{background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35)); border:1px solid rgba(255,255,255,.06);
   border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:4px}
 .tile .name{font-weight:800; color:#d6ece6; font-size:18px}
 .tile .num{font-weight:800; font-size:34px; color:#eaf9f4}
-.tag{margin-left:auto; font-size:12px; font-weight:800; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.2)}
-.tag.good{background:rgba(46,125,50,.22); color:#bdf4c9}
-.tag.fair{background:rgba(55,124,107,.22); color:#cfeee6}
-.tag.warn{background:rgba(191,126,26,.22); color:#ffe2b8}
-.tag.bad{ background:rgba(178,58,58,.22); color:#ffc7c7}
-.tile canvas{height:52px!important}
-.badge-big{margin:8px 14px 0; background:linear-gradient(135deg,rgba(103,209,164,.18),rgba(51,141,112,.18));
-  border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; font-weight:800; color:#e7f7f0}
-
-/* footer */
-footer{border-top:1px solid rgba(255,255,255,.06); padding:18px 24px; display:flex; justify-content:center}
-.footer-inner{display:flex; align-items:center; gap:12px; color:#BFD3D8; font-size:14px; line-height:1.4; opacity:.9}
-.footer-logo{height:22px; width:auto; display:block}
-
-@media (max-width:1200px){ .grid{grid-template-columns:repeat(2,minmax(240px,1fr))} .tiles{grid-template-columns:repeat(2,1fr)} }
-@media (max-width:620px){ h1{font-size:30px} .grid{grid-template-columns:1fr} .tiles{grid-template-columns:1fr} }
-</style>
-</head>
-<body>
-<div class="page">
-  <header>
-    <div class="title-row">
-      <h1>디지털 치유정원 · 실시간 환경 대시보드</h1>
-      <div class="meta" id="nowTxt"></div>
-      <div class="actions">
-        <button class="btn secondary" id="btnMonitor">모니터링</button>
-        <button class="btn" id="btnOverall">종합평가</button>
-        <button class="btn" id="btnRefresh">지금 새로고침</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="grid" id="grid"><!-- JS inject --></main>
-
-  <!-- 큰 그래프 -->
-  <div class="modal" id="modal" aria-hidden="true">
-    <div class="dialog" role="dialog" aria-modal="true">
-      <header><h3 id="modalTitle">그래프</h3><div class="sp"></div><button class="close" id="btnClose">닫기</button></header>
-      <div class="canvas-wrap">
-        <canvas id="chartCanvas"></canvas>
-        <div id="chartTip" style="position:absolute;display:none;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.7);color:#e7f2ef;font-size:12px;pointer-events:none;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 모니터링 보드 -->
-  <div class="overlay" id="monitor" aria-hidden="true">
-    <div class="board" role="dialog" aria-modal="true">
-      <header><h3>실시간 모니터링 보드</h3><div class="sp"></div><button class="close" id="btnMonClose">닫기</button></header>
-      <div class="tiles" id="tiles"></div>
-    </div>
-  </div>
-
-  <!-- 종합평가 보드 -->
-  <div class="overlay" id="overall" aria-hidden="true">
-    <div class="board" role="dialog" aria-modal="true">
-      <header><h3>종합 평가 결과</h3><div class="sp"></div><button class="close" id="btnOvClose">닫기</button></header>
-      <div class="badge-big" id="overallBadge">종합 평가 계산 중…</div>
-      <div class="tiles" id="ovTiles"></div>
-    </div>
-  </div>
-
-  <footer role="contentinfo" aria-label="footer">
-    <div class="footer-inner">
-      <img class="footer-logo" alt="국립정원문화원 로고" id="footerLogo"/>
-      <span>국립정원문화원 · Healing Garden · Dark Forest UI (single-file demo)</span>
-    </div>
-  </footer>
-</div>
-
-<script>
-(function(){
-  const $=(s,e=document)=>e.querySelector(s);
-  const METRICS=[
-    {key:'pm10',  name:'PM10', unit:'µg/m³', range:[0,120],   good:30,  fair:50,  warn:80,   color:'#6fe7c1'},
-    {key:'pm25',  name:'PM2.5',unit:'µg/m³', range:[0,80],    good:15,  fair:30,  warn:50,   color:'#8fd7ff'},
-    {key:'co2',   name:'CO₂',  unit:'ppm',  range:[350,1500], good:700, fair:1000,warn:1400, color:'#f0d96a'},
-    {key:'temp',  name:'온도',  unit:'℃',    range:[-5,35],   good:26,  fair:28,  warn:30,   invert:true, color:'#ffb6a1'},
-    {key:'humi',  name:'습도',  unit:'%RH',  range:[0,100],   good:[40,60], fair:[35,65], warn:[30,70], band:true, color:'#9be6d1'},
-    {key:'lux',   name:'조도',  unit:'lux',  range:[0,1500],  good:1000,fair:700, warn:400, color:'#86ffc8'},
-    {key:'noise', name:'소음',  unit:'dB',   range:[30,85],   good:60,  fair:70,  warn:80,   invert:true, color:'#c9c9ff'},
-    {key:'wind',  name:'풍속',  unit:'m/s',  range:[0,10],    good:5,   fair:7,   warn:9,    invert:true, color:'#c6ffd2'},
-  ];
-  const STATUS_TEXT={good:'좋음', fair:'양호', warn:'주의', bad:'위험'};
-  const STATUS_ORDER={good:0,fair:1,warn:2,bad:3};
-  const HISTORY_LEN=120, UPDATE_MS=30000, PRESEED=60;
-  const STATE={}, MINI={}, BOARD_MINI={}, OV_MINI={};
-
-  function nowString(){ return new Date().toLocaleString('ko-KR',{dateStyle:'medium', timeStyle:'medium'}); }
-  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-  function gentleStep(prev, step, min, max){ return clamp(prev + (Math.random()*2-1)*step, min, max); }
-  function fmt(m,v){ if(['co2','lux','noise'].includes(m.key)) return Math.round(v); if(m.key==='temp'||m.key==='wind') return v.toFixed(1); return Math.round(v); }
-  function statusOf(m,v){
-    if(m.band){ const[g1,g2]=m.good,[f1,f2]=m.fair,[w1,w2]=m.warn; if(v>=g1&&v<=g2)return'good'; if(v>=f1&&v<=f2)return'fair'; if(v>=w1&&v<=w2)return'warn'; return'bad'; }
-    if(m.invert){ if(v<=m.good)return'good'; if(v<=m.fair)return'fair'; if(v<=m.warn)return'warn'; return'bad'; }
-    if(v<=m.good)return'good'; if(v<=m.fair)return'fair'; if(v<=m.warn)return'warn'; return'bad';
-  }
-
-  function cardHTML(m){
-    return `
-    <article class="card" data-key="${m.key}">
-      <div class="kicker"><span class="dot"></span><span class="name">${m.name}</span></div>
-      <div class="value-row"><span class="value" id="${m.key}-val">--</span><span class="unit">${m.unit}</span></div>
-      <span class="badge" id="${m.key}-badge">--</span>
-      <p class="minititle">최근 추이</p>
-      <div class="mini"><canvas id="${m.key}-mini"></canvas></div>
-      <button class="btn-graph" data-open="${m.key}">그래프</button>
-    </article>`;
-  }
-
-  function drawSparkline(canvas, values, ymin, ymax, color){
-    const w = canvas.clientWidth || 10, h = canvas.clientHeight || 10;
-    if (canvas.width!==w) canvas.width=w;
-    if (canvas.height!==h) canvas.height=h;
-    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,w,h);
-
-    if(!values.length){ ctx.fillStyle='#9eb6ad'; ctx.fillText('데이터 없음', 8, h/2); return; }
-
-    const pad=6, xstep=(w-pad*2)/Math.max(1,values.length-1);
-    const toY=v => h-pad - ( (v - ymin) / (ymax - ymin) ) * (h-pad*2);
-    ctx.lineWidth=2; ctx.strokeStyle=color; ctx.fillStyle=color; ctx.globalAlpha=.9;
-
-    // area
-    ctx.beginPath();
-    ctx.moveTo(pad, toY(values[0]));
-    for(let i=1;i<values.length;i++){ ctx.lineTo(pad+i*xstep, toY(values[i])); }
-    ctx.lineTo(pad+(values.length-1)*xstep, h-pad);
-    ctx.lineTo(pad, h-pad);
-    ctx.closePath();
-    ctx.globalAlpha=.18; ctx.fill();
-
-    // line
-    ctx.beginPath();
-    ctx.globalAlpha=1;
-    ctx.moveTo(pad, toY(values[0]));
-    for(let i=1;i<values.length;i++){ ctx.lineTo(pad+i*xstep, toY(values[i])); }
-    ctx.stroke();
-  }
-
-  function renderGrid(){
-    $('#grid').innerHTML = METRICS.map(cardHTML).join('');
-    $('#grid').addEventListener('click', e=>{
-      const btn=e.target.closest('.btn-graph'); if(!btn) return; openModal(btn.dataset.open);
-    });
-  }
-
-  function initState(){
-    const now=Date.now();
-    METRICS.forEach(m=>{
-      let v = (()=>{
-        switch(m.key){
-          case 'pm10':return 25+Math.random()*10;
-          case 'pm25':return 12+Math.random()*8;
-          case 'co2': return 480+Math.random()*120;
-          case 'temp':return 17+Math.random()*3;
-          case 'humi':return 48+Math.random()*10;
-          case 'lux': return 480+Math.random()*160;
-          case 'noise':return 48+Math.random()*8;
-          case 'wind': return .8+Math.random()*1.0;
-        }
-      })();
-      const step = ({pm10:2.2, pm25:1.5, co2:15, temp:.25, humi:1.2, lux:30, noise:1.0, wind:.15})[m.key];
-      const st={value:v, history:[]}; const [min,max]=m.range;
-      for(let i=PRESEED;i>0;i--){ v=gentleStep(v, step, min, max); st.history.unshift({t: now - i*UPDATE_MS, v}); }
-      st.value=v; STATE[m.key]=st;
-    });
-  }
-
-  function updateCards(){
-    METRICS.forEach(m=>{
-      const st=STATE[m.key];
-      $('#'+m.key+'-val').textContent = fmt(m, st.value);
-      const s=statusOf(m, st.value); const b=$('#'+m.key+'-badge'); b.textContent = {good:'좋음',fair:'양호',warn:'주의',bad:'위험'}[s]; b.className='badge '+s;
-      const mini = $('#'+m.key+'-mini');
-      const miniVals = st.history.slice(-40).map(h=>h.v);
-      drawSparkline(mini, miniVals, m.range[0], m.range[1], m.color);
-    });
-    $('#nowTxt').textContent = `${nowString()} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
-  }
-
-  function tileHTML(prefix,m){
-    return `<div class="tile">
-      <div style="display:flex; gap:8px; align-items:center">
-        <span class="name">${m.name}</span>
-        <span class="tag" id="${prefix}${m.key}-tag">--</span>
-      </div>
-      <div class="num" id="${prefix}${m.key}-val">--</div>
-      <canvas id="${prefix}${m.key}-mini"></canvas>
-    </div>`;
-  }
-
-  function buildBoard(){
-    $('#tiles').innerHTML = METRICS.map(m=>tileHTML('board-',m)).join('');
-    METRICS.forEach(m=>{
-      const st=STATE[m.key], vals=st.history.slice(-40).map(h=>h.v);
-      drawSparkline($('#board-'+m.key+'-mini'), vals, m.range[0], m.range[1], m.color);
-    });
-    refreshBoard();
-  }
-  function refreshBoard(){
-    METRICS.forEach(m=>{
-      $('#board-'+m.key+'-val').textContent = fmt(m, STATE[m.key].value)+' '+m.unit;
-      const s=statusOf(m, STATE[m.key].value);
-      const t=$('#boa
+.tag{margin-left:auto; font-size:12px; font-weight:800; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,
