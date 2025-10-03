@@ -4,14 +4,6 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>디지털 치유정원 · 실시간 환경 대시보드</title>
-
-<!-- 폰트 -->
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
-
-<!-- Chart.js + datalabels(옵션) -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-
 <style>
 :root{
   --bg:#0f1614; --panel:#111b18; --card:#11201b; --card-border:rgba(255,255,255,.06);
@@ -21,7 +13,8 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0; color:var(--text); font-family:'Nanum Gothic', system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans KR",sans-serif;
+  margin:0; color:var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
   background:
     radial-gradient(1200px 600px at 15% -10%, #123428 0%, transparent 60%),
     radial-gradient(1100px 700px at 100% -20%, #0e2a22 0%, transparent 65%),
@@ -39,7 +32,6 @@ h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:
   cursor:pointer; box-shadow:var(--shadow); letter-spacing:.2px
 }
 .btn.secondary{background:transparent; color:#d6ece6; border:1px solid rgba(214,236,230,.35)}
-
 .grid{padding:20px 28px 18px; display:grid; gap:16px; grid-template-columns:repeat(4,minmax(240px,1fr))}
 .card{
   position:relative; background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35));
@@ -129,7 +121,10 @@ footer{border-top:1px solid rgba(255,255,255,.06); padding:18px 24px; display:fl
   <div class="modal" id="modal" aria-hidden="true">
     <div class="dialog" role="dialog" aria-modal="true">
       <header><h3 id="modalTitle">그래프</h3><div class="sp"></div><button class="close" id="btnClose">닫기</button></header>
-      <div class="canvas-wrap"><canvas id="chartCanvas"></canvas></div>
+      <div class="canvas-wrap">
+        <canvas id="chartCanvas"></canvas>
+        <div id="chartTip" style="position:absolute;display:none;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.7);color:#e7f2ef;font-size:12px;pointer-events:none;"></div>
+      </div>
     </div>
   </div>
 
@@ -159,15 +154,7 @@ footer{border-top:1px solid rgba(255,255,255,.06); padding:18px 24px; display:fl
 </div>
 
 <script>
-/* ===== 안전 가드: 플러그인 선택 등록 ===== */
-window.addEventListener('DOMContentLoaded', () => {
-  try{ if (window.ChartDataLabels) Chart.register(window.ChartDataLabels); }
-  catch(e){ console.warn('datalabels 플러그인 미등록(무시):', e); }
-
-  startApp();
-});
-
-function startApp(){
+(function(){
   const $=(s,e=document)=>e.querySelector(s);
   const METRICS=[
     {key:'pm10',  name:'PM10', unit:'µg/m³', range:[0,120],   good:30,  fair:50,  warn:80,   color:'#6fe7c1'},
@@ -187,7 +174,6 @@ function startApp(){
   function nowString(){ return new Date().toLocaleString('ko-KR',{dateStyle:'medium', timeStyle:'medium'}); }
   function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
   function gentleStep(prev, step, min, max){ return clamp(prev + (Math.random()*2-1)*step, min, max); }
-  function hexToRGBA(hex,a){ const s=hex.replace('#',''); const b=parseInt(s,16); const r=(b>>16)&255,g=(b>>8)&255,c=b&255; return `rgba(${r},${g},${c},${a})`; }
   function fmt(m,v){ if(['co2','lux','noise'].includes(m.key)) return Math.round(v); if(m.key==='temp'||m.key==='wind') return v.toFixed(1); return Math.round(v); }
   function statusOf(m,v){
     if(m.band){ const[g1,g2]=m.good,[f1,f2]=m.fair,[w1,w2]=m.warn; if(v>=g1&&v<=g2)return'good'; if(v>=f1&&v<=f2)return'fair'; if(v>=w1&&v<=w2)return'warn'; return'bad'; }
@@ -202,14 +188,44 @@ function startApp(){
       <div class="value-row"><span class="value" id="${m.key}-val">--</span><span class="unit">${m.unit}</span></div>
       <span class="badge" id="${m.key}-badge">--</span>
       <p class="minititle">최근 추이</p>
-      <div class="mini"><canvas id="${m.key}-mini"></canvas><span class="mini-fallback" id="${m.key}-fallback" style="display:none">미니그래프 준비 중…</span></div>
+      <div class="mini"><canvas id="${m.key}-mini"></canvas></div>
       <button class="btn-graph" data-open="${m.key}">그래프</button>
     </article>`;
   }
-  function renderGrid(){ $('#grid').innerHTML = METRICS.map(cardHTML).join('');
+
+  function drawSparkline(canvas, values, ymin, ymax, color){
+    const w = canvas.clientWidth || 10, h = canvas.clientHeight || 10;
+    if (canvas.width!==w) canvas.width=w;
+    if (canvas.height!==h) canvas.height=h;
+    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,w,h);
+
+    if(!values.length){ ctx.fillStyle='#9eb6ad'; ctx.fillText('데이터 없음', 8, h/2); return; }
+
+    const pad=6, xstep=(w-pad*2)/Math.max(1,values.length-1);
+    const toY=v => h-pad - ( (v - ymin) / (ymax - ymin) ) * (h-pad*2);
+    ctx.lineWidth=2; ctx.strokeStyle=color; ctx.fillStyle=color; ctx.globalAlpha=.9;
+
+    // area
+    ctx.beginPath();
+    ctx.moveTo(pad, toY(values[0]));
+    for(let i=1;i<values.length;i++){ ctx.lineTo(pad+i*xstep, toY(values[i])); }
+    ctx.lineTo(pad+(values.length-1)*xstep, h-pad);
+    ctx.lineTo(pad, h-pad);
+    ctx.closePath();
+    ctx.globalAlpha=.18; ctx.fill();
+
+    // line
+    ctx.beginPath();
+    ctx.globalAlpha=1;
+    ctx.moveTo(pad, toY(values[0]));
+    for(let i=1;i<values.length;i++){ ctx.lineTo(pad+i*xstep, toY(values[i])); }
+    ctx.stroke();
+  }
+
+  function renderGrid(){
+    $('#grid').innerHTML = METRICS.map(cardHTML).join('');
     $('#grid').addEventListener('click', e=>{
-      const btn=e.target.closest('.btn-graph'); if(!btn) return;
-      openModal(btn.dataset.open);
+      const btn=e.target.closest('.btn-graph'); if(!btn) return; openModal(btn.dataset.open);
     });
   }
 
@@ -239,75 +255,14 @@ function startApp(){
     METRICS.forEach(m=>{
       const st=STATE[m.key];
       $('#'+m.key+'-val').textContent = fmt(m, st.value);
-      const s=statusOf(m, st.value); const b=$('#'+m.key+'-badge'); b.textContent = STATUS_TEXT[s]; b.className='badge '+s;
+      const s=statusOf(m, st.value); const b=$('#'+m.key+'-badge'); b.textContent = {good:'좋음',fair:'양호',warn:'주의',bad:'위험'}[s]; b.className='badge '+s;
+      const mini = $('#'+m.key+'-mini');
+      const miniVals = st.history.slice(-40).map(h=>h.v);
+      drawSparkline(mini, miniVals, m.range[0], m.range[1], m.color);
     });
     $('#nowTxt').textContent = `${nowString()} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
   }
 
-  function buildMini(m, prefix=''){
-    const canvas = document.getElementById(`${prefix}${m.key}-mini`); if(!canvas) return;
-    const fb = document.getElementById(`${m.key}-fallback`);
-    try{
-      const st=STATE[m.key]; const [ymin,ymax]=m.range;
-      const ch = new Chart(canvas,{
-        type:'line',
-        data:{ labels: st.history.slice(-40).map(_=>''), datasets:[{ data: st.history.slice(-40).map(h=>h.v),
-          borderColor:m.color, backgroundColor:hexToRGBA(m.color,.18), tension:.3, fill:true, pointRadius:0, borderWidth:2 }]},
-        options:{ maintainAspectRatio:false, animation:false, plugins:{legend:{display:false},tooltip:{enabled:false}},
-          scales:{ x:{display:false}, y:{display:false, min:ymin, max:ymax} } }
-      });
-      if(prefix==='board-') BOARD_MINI[m.key]=ch; else if(prefix==='ov-') OV_MINI[m.key]=ch; else MINI[m.key]=ch;
-    }catch(err){
-      console.error('mini chart fail', m.key, err);
-      if (fb) fb.style.display='block';
-    }
-  }
-  function refreshMini(map, m){
-    const ch = map[m.key]; if(!ch) return;
-    const hist = STATE[m.key].history.slice(-40);
-    ch.data.labels = hist.map(_=>''); ch.data.datasets[0].data = hist.map(h=>h.v); ch.update('none');
-  }
-
-  /* 큰 그래프 */
-  let chart, chartMetric;
-  function openModal(key){
-    chartMetric = METRICS.find(m=>m.key===key);
-    $('#modalTitle').textContent = `${chartMetric.name} 시간 추이`;
-    $('#modal').classList.add('open');
-    renderChart(chartMetric);
-  }
-  $('#btnClose').onclick=()=>$('#modal').classList.remove('open');
-
-  function renderChart(m){
-    const ctx=$('#chartCanvas'); if(chart){ try{ chart.destroy(); }catch{} }
-    try{
-      const hist=STATE[m.key].history;
-      const labels=hist.map(h=>new Date(h.t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}));
-      const data=hist.map(h=>h.v); const [ymin,ymax]=m.range;
-      chart=new Chart(ctx,{ type:'line',
-        data:{ labels, datasets:[{ label:m.name, data, borderColor:m.color, backgroundColor:hexToRGBA(m.color,.18),
-          tension:.25, fill:true, pointRadius:2, borderWidth:2 }]},
-        options:{
-          maintainAspectRatio:false, interaction:{mode:'index', intersect:false},
-          plugins:{
-            legend:{display:false},
-            tooltip:{enabled:true, callbacks:{ label:(c)=> `${c.formattedValue} ${m.unit}` }},
-            datalabels: (window.ChartDataLabels? {
-              align:'top', anchor:'end', color:'#cfeee6', backgroundColor:'rgba(0,0,0,.35)',
-              borderRadius:6, padding:4,
-              formatter:(v,ctx)=> (ctx.dataIndex%Math.ceil(data.length/12)===0)? `${fmt(m,v)}${m.unit.replace('%RH','%')}`:''
-            } : undefined)
-          },
-          scales:{ x:{ticks:{color:'#a9c9c0'}, grid:{color:'rgba(255,255,255,.06)'}},
-                  y:{min:ymin,max:ymax,ticks:{color:'#a9c9c0'}, grid:{color:'rgba(255,255,255,.06)'}} }
-      });
-    }catch(err){
-      console.error('big chart fail', err);
-      ctx.replaceWith(Object.assign(document.createElement('div'),{style:'padding:16px;color:#cfeee6',textContent:'그래프를 불러오지 못했습니다.'}));
-    }
-  }
-
-  /* 보드/평가 */
   function tileHTML(prefix,m){
     return `<div class="tile">
       <div style="display:flex; gap:8px; align-items:center">
@@ -321,78 +276,14 @@ function startApp(){
 
   function buildBoard(){
     $('#tiles').innerHTML = METRICS.map(m=>tileHTML('board-',m)).join('');
-    METRICS.forEach(m=>buildMini(m,'board-'));
+    METRICS.forEach(m=>{
+      const st=STATE[m.key], vals=st.history.slice(-40).map(h=>h.v);
+      drawSparkline($('#board-'+m.key+'-mini'), vals, m.range[0], m.range[1], m.color);
+    });
     refreshBoard();
   }
   function refreshBoard(){
     METRICS.forEach(m=>{
       $('#board-'+m.key+'-val').textContent = fmt(m, STATE[m.key].value)+' '+m.unit;
       const s=statusOf(m, STATE[m.key].value);
-      const t=$('#board-'+m.key+'-tag'); t.textContent=STATUS_TEXT[s]; t.className='tag '+s;
-      refreshMini(BOARD_MINI, m);
-    });
-  }
-
-  function overallBadgeText(){
-    let worst='good', parts=[];
-    METRICS.forEach(m=>{ const s=statusOf(m, STATE[m.key].value); if(STATUS_ORDER[s]>STATUS_ORDER[worst]) worst=s; parts.push(`${m.name}:${STATUS_TEXT[s]}`); });
-    const overall = worst==='good'?'쾌적':worst==='fair'?'양호':worst==='warn'?'주의':'경고';
-    return {overall, detail:parts.join(' · ')};
-  }
-  function buildOverall(){
-    $('#ovTiles').innerHTML = METRICS.map(m=>tileHTML('ov-',m)).join('');
-    METRICS.forEach(m=>buildMini(m,'ov-'));
-    refreshOverall();
-  }
-  function refreshOverall(){
-    const b=overallBadgeText();
-    $('#overallBadge').innerHTML = `<strong>종합 평가: ${b.overall}</strong> · ${b.detail}`;
-    METRICS.forEach(m=>{
-      $('#ov-'+m.key+'-val').textContent = fmt(m, STATE[m.key].value)+' '+m.unit;
-      const s=statusOf(m, STATE[m.key].value);
-      const t=$('#ov-'+m.key+'-tag'); t.textContent=STATUS_TEXT[s]; t.className='tag '+s;
-      refreshMini(OV_MINI, m);
-    });
-  }
-
-  function tick(){
-    METRICS.forEach(m=>{
-      const st=STATE[m.key], [min,max]=m.range;
-      const step = ({pm10:2.2, pm25:1.5, co2:15, temp:.25, humi:1.2, lux:30, noise:1.0, wind:.15})[m.key];
-      st.value = gentleStep(st.value, step, min, max);
-      st.history.push({t:Date.now(), v:st.value});
-      if(st.history.length>HISTORY_LEN) st.history.shift();
-    });
-    updateCards();
-    METRICS.forEach(m=>refreshMini(MINI, m));
-    refreshBoard(); refreshOverall();
-  }
-
-  /* 시작 순서 */
-  try{
-    renderGrid();               // 1) 카드 먼저
-    initState();                // 2) 데이터 시드
-    updateCards();              // 3) 값/뱃지 채우기
-    METRICS.forEach(m=>buildMini(m)); // 4) 미니 그래프(try/catch 내부)
-  }catch(e){
-    console.error('초기 렌더 오류', e);
-  }
-  $('#nowTxt').textContent = `${nowString()} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
-  let timer=setInterval(()=>{ try{ tick(); }catch(e){ console.error('tick fail', e); } }, UPDATE_MS);
-  $('#btnRefresh').onclick = ()=>{ try{ tick(); }catch(e){ console.error(e);} };
-
-  /* 오버레이 토글 */
-  $('#btnMonitor').onclick = ()=>{ try{ buildBoard(); $('#monitor').classList.add('open'); }catch(e){ console.error(e);} };
-  $('#btnMonClose').onclick = ()=> $('#monitor').classList.remove('open');
-  $('#btnOverall').onclick = ()=>{ try{ buildOverall(); $('#overall').classList.add('open'); }catch(e){ console.error(e);} };
-  $('#btnOvClose').onclick = ()=> $('#overall').classList.remove('open');
-  $('#btnClose').onclick = ()=> $('#modal').classList.remove('open');
-  window.addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('#modal').classList.remove('open'); $('#monitor').classList.remove('open'); $('#overall').classList.remove('open'); } });
-
-  /* footer 로고(Base64 인라인) */
-  const LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAHAAAAAwCAYAAACb8vE/AAAACXBIWXMAAAsSAAALEgHS3X78AAABnUlEQVR4nO2ZwU7CQBCEvxfyCw3mC1c6w3c0l1mF3oVaf0O4b5jzH0J4i2kT5J8C2cCkqXgqk2b1b1h3J1lqGz0vN3Bv9Hq9uK6pWmV0pX2k0j1r3b7j0d8F0xgCw3o9wYQmLr8qL2Q8C2cE6T4sRr1bq8g3E8Ck1o0N2b6yq8Ygqv3rK2k5m0m3kI7wq2cQw1r9g1t6o2xQw2M8Ew5z+8vGqzqQ0i9eB2Y7hXh6Yx6a0WZB5X3cC5h9XxJ4FZ3bqEwZ9z4B4Qw3eY9H5yK2KQf6wfuJmQ6cA0b5o4Z6m6IYw8nQ3sL8hZ2q0R2YbO2yJm8b6QxOe2+2e4l5D4v3s1oQ7eTqzF8lH3qgYb0Jr2Vw0oG+q1lK3QFqf0y1oN1Ff3qQk1P8iJmQqf1H9vWQz6tJ7mZ9p7wq6W+0s6G8q9h9cZ5YV8QeQ4x5o3L9bqgW3m8k3C2n8u8Q0AAAAASUVORK5CYII=";
-  document.getElementById('footerLogo').src = "data:image/png;base64,"+LOGO_B64;
-}
-</script>
-</body>
-</html>
+      const t=$('#boa
