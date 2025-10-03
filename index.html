@@ -12,15 +12,24 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
 
 <style>
+/* CSS 변수: 폰트/색 대비 유지 */
 :root{
-  --bg:#071613; --panel: radial-gradient(160% 200% at 50% -40%, #0c241e 0%, #061815 70%);
-  --ink:#dff9ef; --muted:#bfead8; --good:#22c58b; --ok:#ffd166; --bad:#ff7b7b;
-  --cardBorder: rgba(191,234,216,.18); --grid:#123229;
-  --chart-text:#bfead8; --chart-grid:rgba(191,234,216,.18); --chart-axis:rgba(191,234,216,.38);
+  --bg:#071613; --panel: radial-gradient(160% 200% at 50% -40%, #0c241e 0%, #061815 70%);
+  --ink:#dff9ef; /* 메인 폰트 색상 */
+  --muted:#bfead8; /* 보조 폰트 색상 */
+  --good:#22c58b; --ok:#ffd166; --bad:#ff7b7b;
+  --cardBorder: rgba(191,234,216,.18); --grid:#123229;
+  --chart-text:#bfead8; /* 차트 폰트 색상 (배경과 대비 유지) */
+  --chart-grid:rgba(191,234,216,.18); --chart-axis:rgba(191,234,216,.38);
 }
-*{ box-sizing:border-box } html,body{height:100%}
+*{ box-sizing:border-box }
+
+/* 모바일/데스크톱 안정성 확보를 위한 높이 설정 */
+html{height:100%}
 body{ margin:0; font-family:'Pretendard',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  color:var(--ink); background:radial-gradient(140% 160% at 50% -30%, #0f2d25 0%, #071613 65%)}
+  color:var(--ink); background:radial-gradient(140% 160% at 50% -30%, #0f2d25 0%, #071613 65%);
+  min-height: 100vh; /* 최소 높이 설정 */
+}
 
 /* 헤더 */
 .header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 26px 12px}
@@ -30,9 +39,9 @@ body{ margin:0; font-family:'Pretendard',system-ui,-apple-system,Segoe UI,Roboto
 
 /* 버튼 */
 .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;
-  border:1px solid rgba(191,234,216,.2);cursor:pointer;background:#0d241d;color:var(--ink);
-  font-weight:800;letter-spacing:.2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
-  transition:transform .12s,box-shadow .12s,background .12s}
+  border:1px solid rgba(191,234,216,.2);cursor:pointer;background:#0d241d;color:var(--ink);
+  font-weight:800;letter-spacing:.2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  transition:transform .12s,box-shadow .12s,background .12s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.25),inset 0 0 0 1px rgba(255,255,255,.12)}
 .btn--primary{background:var(--good);color:#04251b;border-color:transparent}
 
@@ -41,7 +50,7 @@ body{ margin:0; font-family:'Pretendard',system-ui,-apple-system,Segoe UI,Roboto
 
 /* 카드 */
 .card{position:relative;border:1px solid var(--cardBorder);background:var(--panel);border-radius:16px;
-  padding:16px 16px 58px;min-height:170px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+  padding:16px 16px 58px;min-height:170px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
 .card__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .card__label{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.2px}
 .bullet{width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(34,197,139,.15)}
@@ -54,282 +63,301 @@ body{ margin:0; font-family:'Pretendard',system-ui,-apple-system,Segoe UI,Roboto
 .card__unit{color:var(--muted);font-size:14px;margin-left:6px}
 .card__hint{color:var(--muted);font-size:12px;margin:4px 0 6px;opacity:.9}
 
-/* 스파크라인 고정 영역(흘러내림 방지) */
+/* 스파크라인 고정 영역: 흘러내림(canvas 높이가 커지는 문제) 방지 */
 .spark-wrap{height:56px;overflow:hidden}
-.spark{height:56px;width:100%;display:block}
+.spark{height:100%;width:100%;display:block} /* 높이를 100%로 설정 */
 
-/* 그래프 버튼 */
+/* 그래프 버튼 동작 확인 */
 .btn-graph{position:absolute;right:12px;bottom:12px;z-index:2;display:inline-flex;gap:6px;align-items:center;
-  background:#22c58b;color:#062a1f;border:0;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:800;
-  letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 16px rgba(34,197,139,.25),inset 0 0 0 1px rgba(255,255,255,.18)}
+  background:#22c58b;color:#062a1f;border:0;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:800;
+  letter-spacing:.2px;cursor:pointer;box-shadow:0 6px 16px rgba(34,197,139,.25),inset 0 0 0 1px rgba(255,255,255,.18)}
 .btn-graph::before{content:"📈"}
 
 /* 모달 공통 */
 .modal{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:90}
 .modal.is-open{display:flex}
 .modal__panel{width:min(1200px,92vw);height:min(76vh,900px);background:radial-gradient(120% 140% at 50% 0%,#0e2620 0%,#061815 80%);
-  border:1px solid rgba(191,234,216,.2);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column}
+  border:1px solid rgba(191,234,216,.2);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column}
 .modal__bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(191,234,216,.18);color:#bfead8;font-weight:800}
 .modal__close{background:transparent;color:#bfead8;border:0;font-weight:800;cursor:pointer}
-.modal__canvas-wrap{padding:14px 14px 18px;flex:1}
-#detailChart{width:100%!important;height:100%!important}
+/* 모달 차트 컨테이너: flex-1로 모달 크기에 맞춰 유동적으로 높이 확보 */
+.modal__canvas-wrap{padding:14px 14px 18px;flex:1;min-height:0}
+/* Canvas에 width/height 100% 설정이 중요함 (Chart.js 옵션으로 제어 가능하지만 CSS에서도 보조) */
+#detailChart{width:100%;height:100%;display:block}
 
 /* 종합평가 */
-.eval-wrap{padding:16px;display:grid;gap:12px;grid-template-columns:repeat(4,1fr);overflow:auto}
+.eval-wrap{padding:16px;display:grid;gap:12px;grid-template-columns:repeat(4,1fr);overflow-y:auto} /* 모바일에서 스크롤 가능하도록 overflow-y:auto 추가 */
 .eval-card{border:1px solid var(--cardBorder);background:var(--panel);border-radius:14px;padding:16px;display:flex;gap:12px;align-items:center}
 .eval-card__title{font-weight:800}
-.eval-card__score{margin-left:auto;font-weight:800}
+.eval-card__score{margin-left:auto;font-weight:800;flex-shrink:0} /* 점수가 잘리지 않도록 flex-shrink:0 추가 */
 .eval-overall{margin:12px 16px 6px;padding:12px 14px;border-radius:12px;border:1px solid var(--cardBorder);background:#0b241e;font-weight:800}
 
 /* 푸터 로고 */
 .footer{padding:6px 16px 22px;color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;justify-content:center}
 .footer img{height:18px;opacity:.92}
 
-/* 반응형 */
-@media (max-width:1200px){ .grid{grid-template-columns:repeat(2,1fr)} .card__value{font-size:34px} }
-@media (max-width:680px){ .grid{grid-template-columns:1fr} .title{font-size:26px} .card__value{font-size:30px} }
+/* 반응형 레이아웃 개선 */
+@media (max-width:1200px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .card__value{font-size:34px}
+  .eval-wrap{grid-template-columns:repeat(2,1fr)} /* 태블릿에서 2열 */
+}
+@media (max-width:680px){
+  .header{padding:16px 16px 8px; flex-wrap:wrap} /* 모바일 헤더 */
+  .header__right{margin-top:6px; width:100%; justify-content:stretch}
+  .header__right .btn{flex:1; justify-content:center}
+  .grid{grid-template-columns:1fr; padding:8px 16px 16px}
+  .title{font-size:26px}
+  .card__value{font-size:30px}
+  .eval-wrap{grid-template-columns:1fr} /* 모바일에서 1열 */
+  .modal__panel{width:98vw; height:90vh} /* 모바일 모달 크기 조정 */
+}
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="title">디지털 치유정원 · 실시간 환경 대시보드</div>
-  <div class="header__right">
-    <span class="chip-time" id="timeNote">-</span>
-    <button class="btn" id="btnViewMonitor">모니터링</button>
-    <button class="btn" id="btnViewEval">종합평가</button>
-    <button class="btn btn--primary" id="btnRefresh">지금 새로고침</button>
-  </div>
+  <div class="title">디지털 치유정원 · 실시간 환경 대시보드</div>
+  <div class="header__right">
+    <span class="chip-time" id="timeNote">-</span>
+    <button class="btn" id="btnViewMonitor">모니터링</button>
+    <button class="btn" id="btnViewEval">종합평가</button>
+    <button class="btn btn--primary" id="btnRefresh">지금 새로고침</button>
+  </div>
 </header>
 
 <main class="grid" id="grid"></main>
 
 <footer class="footer">
-  <img alt="국립정원문화원 로고" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMjgwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZvbnQtZmFtaWx5PSJQcmV0ZW5kYXJkLCBzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iODAwIj48cGF0aCBkPSJNMCAyMGM2MC0xMCA5MC0xMCAxNTAuNSAwUzI0MCAzMCAyODAgMjAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjkwIi8+PHRleHQgeD0iMTQiIHk9IjI5IiBmb250LXNpemU9IjE0IiBmaWxsPSIjZmZmIj7qsIDslYjqsJDsnbTqsIQg7ZiE7J6l66m07Yq4PC90ZXh0PjwvZz48L3N2Zz4=" />
-  <span>· Healing Garden · Dark Forest UI (single-file)</span>
+  <img alt="국립정원문화원 로고" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMjgwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZvbnQtZmFtaWx5PSJQcmV0ZW5kYXJkLCBzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iODAwIj48cGF0aCBkPSJNMCAyMGM2MC0xMCA5MC0xMCAxNTAuNSAwUzI0MCAzMCAyODAgMjAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjkwIi8+PHRleHQgeD0iMTQiIHk9IjI5IiBmb250LXNpemU9IjE0IiBmaWxsPSIjZmZmIj7qsIDslYjqsJDsnbTqsIQg7ZiE7J6l66m07Yq4PC90ZXh0PjwvZz48L3N2Zz4=" />
+  <span>· Healing Garden · Dark Forest UI (single-file)</span>
 </footer>
 
-<!-- 상세 그래프 모달 -->
-<div id="chartModal" class="modal" aria-hidden="true">
-  <div class="modal__panel">
-    <div class="modal__bar">
-      <strong id="chartTitle">상세 그래프</strong>
-      <button type="button" class="modal__close" id="closeChart">닫기 ✕</button>
-    </div>
-    <div class="modal__canvas-wrap"><canvas id="detailChart"></canvas></div>
-  </div>
+<div id="chartModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal__panel">
+    <div class="modal__bar">
+      <strong id="chartTitle">상세 그래프</strong>
+      <button type="button" class="modal__close" id="closeChart">닫기 ✕</button>
+    </div>
+    <div class="modal__canvas-wrap"><canvas id="detailChart"></canvas></div>
+  </div>
 </div>
 
-<!-- 종합 평가 모달 -->
-<div id="evalModal" class="modal" aria-hidden="true">
-  <div class="modal__panel">
-    <div class="modal__bar">
-      <strong>종합 평가</strong>
-      <button type="button" class="modal__close" id="closeEval">닫기 ✕</button>
-    </div>
-    <div id="evalOverall" class="eval-overall">종합 상태 계산 중…</div>
-    <div class="eval-wrap" id="evalWrap"></div>
-  </div>
+<div id="evalModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal__panel">
+    <div class="modal__bar">
+      <strong>종합 평가</strong>
+      <button type="button" class="modal__close" id="closeEval">닫기 ✕</button>
+    </div>
+    <div id="evalOverall" class="eval-overall">종합 상태 계산 중…</div>
+    <div class="eval-wrap" id="evalWrap"></div>
+  </div>
 </div>
 
 <script>
 const ITEMS = [
-  { key:'pm10', label:'PM10',  unit:'µg/m³', color:'#50f4c2' },
-  { key:'pm25', label:'PM2.5', unit:'µg/m³', color:'#5bd6ff' },
-  { key:'co2',  label:'CO₂',   unit:'ppm',   color:'#ffe36e' },
-  { key:'temp', label:'온도',   unit:'℃',     color:'#ffb386' },
-  { key:'hum',  label:'습도',   unit:'%RH',   color:'#b2f1dd' },
-  { key:'lux',  label:'조도',   unit:'lux',   color:'#84ffc9' },
-  { key:'noise',label:'소음',   unit:'dB',    color:'#a7b8ff' },
-  { key:'wind', label:'풍속',   unit:'m/s',   color:'#93f6f2' },
+  { key:'pm10', label:'PM10',  unit:'µg/m³', color:'#50f4c2' },
+  { key:'pm25', label:'PM2.5', unit:'µg/m³', color:'#5bd6ff' },
+  { key:'co2',  label:'CO₂',   unit:'ppm',   color:'#ffe36e' },
+  { key:'temp', label:'온도',   unit:'℃',     color:'#ffb386' },
+  { key:'hum',  label:'습도',   unit:'%RH',   color:'#b2f1dd' },
+  { key:'lux',  label:'조도',   unit:'lux',   color:'#84ffc9' },
+  { key:'noise',label:'소음',   unit:'dB',    color:'#a7b8ff' },
+  { key:'wind', label:'풍속',   unit:'m/s',   color:'#93f6f2' },
 ];
 function statusOf(key,val){
-  switch(key){
-    case 'pm10': return val<50 ? '좋음' : (val<100?'주의':'나쁨');
-    case 'pm25': return val<25 ? '좋음' : (val<50?'주의':'나쁨');
-    case 'co2' : return val<800 ? '좋음' : (val<1200?'주의':'나쁨');
-    case 'temp': return (val>=18&&val<=26) ? '좋음' : '주의';
-    case 'hum' : return (val>=40&&val<=60) ? '좋음' : '주의';
-    case 'lux' : return (val>=200&&val<=800)? '좋음' : '주의';
-    case 'noise':return val<60 ? '좋음' : (val<75?'주의':'나쁨');
-    case 'wind': return val<5 ? '좋음' : (val<9?'주의':'나쁨');
-    default:return '주의';
-  }
+  switch(key){
+    case 'pm10': return val<50 ? '좋음' : (val<100?'주의':'나쁨');
+    case 'pm25': return val<25 ? '좋음' : (val<50?'주의':'나쁨');
+    case 'co2' : return val<800 ? '좋음' : (val<1200?'주의':'나쁨');
+    case 'temp': return (val>=18&&val<=26) ? '좋음' : '주의';
+    case 'hum' : return (val>=40&&val<=60) ? '좋음' : '주의';
+    case 'lux' : return (val>=200&&val<=800)? '좋음' : '주의';
+    case 'noise':return val<60 ? '좋음' : (val<75?'주의':'나쁨');
+    case 'wind': return val<5 ? '좋음' : (val<9?'주의':'나쁨');
+    default:return '주의';
+  }
 }
 function badgeClass(s){ return s==='좋음' ? 'badge--good' : (s==='주의'?'badge--warn':'badge--bad'); }
+function getCss(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() }
 
+/* Chart.js 기본 설정: 폰트/색 대비 유지 */
 Chart.defaults.font.family = "'Pretendard',system-ui,-apple-system,Segoe UI,Roboto,sans-serif";
 Chart.defaults.font.size = 12;
 Chart.defaults.color = getCss('--chart-text');
 Chart.defaults.plugins.legend.labels.color = Chart.defaults.color;
 Chart.defaults.plugins.tooltip.titleColor = '#07241b';
-Chart.defaults.plugins.tooltip.bodyColor  = '#07241b';
+Chart.defaults.plugins.tooltip.bodyColor  = '#07241b';
 Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(191,234,216,.96)';
 
+/* 스파크라인 설정: 모바일/데스크톱에서 안정적으로 보이도록 maintainAspectRatio: false 추가 */
 const sparkOptions = {
-  responsive:true, maintainAspectRatio:true, aspectRatio:5,
-  resizeDelay:0,
-  animation:false,
-  plugins:{ legend:{display:false}, tooltip:{enabled:true, mode:'index', intersect:false} },
-  scales:{ x:{display:false}, y:{display:false} },
-  elements:{ line:{ borderWidth:2, tension:.35 }, point:{ radius:0, hitRadius:6 } }
+  responsive:true, maintainAspectRatio:false, aspectRatio:5, /* 컨테이너 높이(56px)에 맞춰 스케일 조정 */
+  resizeDelay:0,
+  animation:false,
+  plugins:{ legend:{display:false}, tooltip:{enabled:true, mode:'index', intersect:false} },
+  scales:{ x:{display:false}, y:{display:false} },
+  elements:{ line:{ borderWidth:2, tension:.35 }, point:{ radius:0, hitRadius:6 } }
 };
 
 const historyMap = {};
 const sparkCharts = {};
 const dom = {
-  grid: document.getElementById('grid'),
-  timeNote: document.getElementById('timeNote'),
-  btnRefresh: document.getElementById('btnRefresh'),
-  btnViewEval: document.getElementById('btnViewEval'),
-  btnViewMon : document.getElementById('btnViewMonitor'),
-  chartModal: document.getElementById('chartModal'),
-  chartTitle: document.getElementById('chartTitle'),
-  chartClose: document.getElementById('closeChart'),
-  detailCanvas: document.getElementById('detailChart'),
-  evalModal: document.getElementById('evalModal'),
-  evalClose: document.getElementById('closeEval'),
-  evalWrap: document.getElementById('evalWrap'),
-  evalOverall: document.getElementById('evalOverall'),
+  grid: document.getElementById('grid'),
+  timeNote: document.getElementById('timeNote'),
+  btnRefresh: document.getElementById('btnRefresh'),
+  btnViewEval: document.getElementById('btnViewEval'),
+  btnViewMon : document.getElementById('btnViewMonitor'),
+  chartModal: document.getElementById('chartModal'),
+  chartTitle: document.getElementById('chartTitle'),
+  chartClose: document.getElementById('closeChart'),
+  detailCanvas: document.getElementById('detailChart'),
+  evalModal: document.getElementById('evalModal'),
+  evalClose: document.getElementById('closeEval'),
+  evalWrap: document.getElementById('evalWrap'),
+  evalOverall: document.getElementById('evalOverall'),
 };
 let detailChart;
 
 function initCards(){
-  const frag = document.createDocumentFragment();
-  ITEMS.forEach(it=>{
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card__top">
-        <div class="card__label"><span class="bullet"></span><span>${it.label}</span></div>
-        <span class="badge" id="badge-${it.key}">-</span>
-      </div>
-      <div>
-        <span class="card__value" id="val-${it.key}">-</span><span class="card__unit">${it.unit}</span>
-        <div class="card__hint">최근 추이</div>
-        <div class="spark-wrap">
-          <canvas class="spark" id="spark-${it.key}"></canvas>
-        </div>
-      </div>
-      <button class="btn-graph" data-open="${it.key}">그래프</button>
-    `;
-    frag.appendChild(card);
-  });
-  dom.grid.appendChild(frag);
+  const frag = document.createDocumentFragment();
+  ITEMS.forEach(it=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card__top">
+        <div class="card__label"><span class="bullet"></span><span>${it.label}</span></div>
+        <span class="badge" id="badge-${it.key}">-</span>
+      </div>
+      <div>
+        <span class="card__value" id="val-${it.key}">-</span><span class="card__unit">${it.unit}</span>
+        <div class="card__hint">최근 추이</div>
+        <div class="spark-wrap">
+          <canvas class="spark" id="spark-${it.key}"></canvas>
+        </div>
+      </div>
+      <button class="btn-graph" data-open="${it.key}">그래프</button>
+    `;
+    frag.appendChild(card);
+  });
+  dom.grid.appendChild(frag);
 
-  ITEMS.forEach(it=>{
-    const ctx = document.getElementById(`spark-${it.key}`).getContext('2d');
-    sparkCharts[it.key] = new Chart(ctx, {
-      type:'line',
-      data:{ labels: [], datasets:[{ data:[], borderColor:it.color, backgroundColor:'transparent' }]},
-      options: sparkOptions
-    });
-  });
+  ITEMS.forEach(it=>{
+    const ctx = document.getElementById(`spark-${it.key}`).getContext('2d');
+    sparkCharts[it.key] = new Chart(ctx, {
+      type:'line',
+      data:{ labels: [], datasets:[{ data:[], borderColor:it.color, backgroundColor:'transparent' }]},
+      options: sparkOptions
+    });
+  });
 
-  document.querySelectorAll('.btn-graph').forEach(btn=>{
-    btn.addEventListener('click', ()=> openDetailChart(btn.dataset.open));
-  });
+  // 카드별 '그래프' 버튼 동작 확인
+  document.querySelectorAll('.btn-graph').forEach(btn=>{
+    btn.addEventListener('click', ()=> openDetailChart(btn.dataset.open));
+  });
 }
 
 function updateCard(key,val){
-  document.getElementById(`val-${key}`).textContent = val;
-  const s = statusOf(key, Number(val));
-  const badge = document.getElementById(`badge-${key}`);
-  badge.textContent = s;
-  badge.className = `badge ${badgeClass(s)}`;
+  document.getElementById(`val-${key}`).textContent = val;
+  const s = statusOf(key, Number(val));
+  const badge = document.getElementById(`badge-${key}`);
+  badge.textContent = s;
+  badge.className = `badge ${badgeClass(s)}`;
 }
 function updateSpark(key){
-  const chart = sparkCharts[key];
-  const arr = historyMap[key] || [];
-  chart.data.labels = arr.map(d=>d.t);
-  chart.data.datasets[0].data = arr.map(d=>d.v);
-  chart.update();
+  const chart = sparkCharts[key];
+  const arr = historyMap[key] || [];
+  chart.data.labels = arr.map(d=>d.t);
+  chart.data.datasets[0].data = arr.map(d=>d.v);
+  chart.update('none'); // 미세 변화 유지를 위해 'none' 옵션을 사용하여 애니메이션 없이 업데이트
 }
 
 /* 데이터(데모) */
 function pushHistory(key,t,v){
-  if (!historyMap[key]) historyMap[key]=[];
-  historyMap[key].push({t,v});
-  if (historyMap[key].length>300) historyMap[key].shift();
+  if (!historyMap[key]) historyMap[key]=[];
+  historyMap[key].push({t,v});
+  if (historyMap[key].length>300) historyMap[key].shift();
 }
 function randomInit(){
-  const now=Date.now();
-  ITEMS.forEach((it,i)=>{
-    let base = { pm10:25, pm25:12, co2:520, temp:18.7, hum:55, lux:420, noise:52, wind:1.2 }[it.key];
-    for(let j=59;j>=0;j--){
-      const t = new Date(now - j*30*1000);
-      const v = Number((base + Math.sin((60-j)/10 + i) * (it.key==='co2'? 8: it.key==='temp'? .7 : (it.key==='hum'? 2: 1)) + (Math.random()*2-1)).toFixed(it.key==='temp'?1:0));
-      pushHistory(it.key, t, v);
-    }
-  });
+  const now=Date.now();
+  ITEMS.forEach((it,i)=>{
+    let base = { pm10:25, pm25:12, co2:520, temp:18.7, hum:55, lux:420, noise:52, wind:1.2 }[it.key];
+    for(let j=59;j>=0;j--){
+      const t = new Date(now - j*30*1000);
+      const v = Number((base + Math.sin((60-j)/10 + i) * (it.key==='co2'? 8: it.key==='temp'? .7 : (it.key==='hum'? 2: 1)) + (Math.random()*2-1)).toFixed(it.key==='temp'?1:0));
+      pushHistory(it.key, t, v);
+    }
+  });
 }
 function tickOnce(){
-  ITEMS.forEach(it=>{
-    const last = historyMap[it.key]?.at(-1)?.v ?? 0;
-    const noise = ({ pm10:.9, pm25:.7, co2:5.5, temp:.3, hum:1, lux:16, noise:.7, wind:.25 })[it.key] || 1;
-    const v = Number((last + (Math.random()*2-1)*noise).toFixed(it.key==='temp'?1:0));
-    pushHistory(it.key, new Date(), v);
-    updateCard(it.key, v); updateSpark(it.key);
-  });
-  dom.timeNote.textContent = new Date().toLocaleString() + ' 기준 · 30초 간격 업데이트';
+  ITEMS.forEach(it=>{
+    const last = historyMap[it.key]?.at(-1)?.v ?? 0;
+    const noise = ({ pm10:.9, pm25:.7, co2:5.5, temp:.3, hum:1, lux:16, noise:.7, wind:.25 })[it.key] || 1;
+    const v = Number((last + (Math.random()*2-1)*noise).toFixed(it.key==='temp'?1:0));
+    pushHistory(it.key, new Date(), v);
+    updateCard(it.key, v); updateSpark(it.key);
+  });
+  dom.timeNote.textContent = new Date().toLocaleString() + ' 기준 · 30초 간격 업데이트';
 }
 function refreshNow(){ tickOnce() }
 
-/* 상세 모달 차트 */
-function getCss(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() }
+/* 상세 모달 차트: 모달 차트 안정적으로 보이도록 */
 function openDetailChart(key){
-  const meta = ITEMS.find(i=>i.key===key);
-  const series = (historyMap[key]||[]).slice(-240);
-  const labels = series.map(d=>d.t);
-  const data   = series.map(d=>d.v);
-  const min = Math.min(...data), max=Math.max(...data);
-  const pad = (max-min)*.15 || 1;
+  const meta = ITEMS.find(i=>i.key===key);
+  const series = (historyMap[key]||[]).slice(-240); // 최근 2시간 (4시간으로 보이면 더 좋음)
+  const labels = series.map(d=>d.t);
+  const data   = series.map(d=>d.v);
+  const min = Math.min(...data), max=Math.max(...data);
+  const pad = (max-min)*.15 || 1;
 
-  dom.chartTitle.textContent = `${meta.label} 상세 추이`;
-  const ctx = dom.detailCanvas.getContext('2d');
-  if (detailChart) detailChart.destroy();
-  detailChart = new Chart(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{ label:meta.label, data, borderColor:meta.color, backgroundColor:'transparent', pointRadius:2, tension:.28 }]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ type:'time', time:{ unit:'minute', tooltipFormat:'yyyy-MM-dd HH:mm:ss' },
-            grid:{ color:getCss('--chart-grid') }, ticks:{ color:getCss('--chart-text') } },
-        y:{ suggestedMin:min-pad, suggestedMax:max+pad,
-            grid:{ color:getCss('--chart-grid') }, ticks:{ color:getCss('--chart-axis') } }
-      }
-    }
-  });
-  dom.chartModal.classList.add('is-open'); dom.chartModal.setAttribute('aria-hidden','false');
+  dom.chartTitle.textContent = `${meta.label} 상세 추이 (${meta.unit})`;
+  const ctx = dom.detailCanvas.getContext('2d');
+  if (detailChart) detailChart.destroy();
+  detailChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{ label:meta.label, data, borderColor:meta.color, backgroundColor:'transparent', pointRadius:2, tension:.28 }]},
+    options:{
+      responsive:true, maintainAspectRatio:false, /* 모달 크기에 따라 유동적으로 크기 조절 */
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ type:'time', time:{ unit:'minute', tooltipFormat:'yyyy-MM-dd HH:mm:ss' },
+            grid:{ color:getCss('--chart-grid') }, ticks:{ color:getCss('--chart-text') } },
+        y:{ suggestedMin:min-pad, suggestedMax:max+pad,
+            grid:{ color:getCss('--chart-grid') }, ticks:{ color:getCss('--chart-axis') } }
+      }
+    }
+  });
+  dom.chartModal.classList.add('is-open'); dom.chartModal.setAttribute('aria-hidden','false');
 }
 function closeChart(){ dom.chartModal.classList.remove('is-open'); dom.chartModal.setAttribute('aria-hidden','true') }
 
-/* 종합 평가 */
+/* 종합 평가 모달 동작 확인 */
 function openEval(){
-  dom.evalWrap.innerHTML=''; let good=0;
-  ITEMS.forEach(it=>{
-    const last = historyMap[it.key]?.at(-1)?.v ?? '-';
-    const s = statusOf(it.key, Number(last)); if(s==='좋음') good++;
-    const el = document.createElement('div'); el.className='eval-card';
-    el.innerHTML = `
-      <div class="bullet" style="background:${it.color};box-shadow:0 0 0 3px ${it.color}30"></div>
-      <div class="eval-card__title">${it.label}</div>
-      <span class="badge ${badgeClass(s)}" style="margin-left:8px">${s}</span>
-      <div class="eval-card__score">${last} <span style="color:var(--muted);font-size:12px">${it.unit}</span></div>`;
-    dom.evalWrap.appendChild(el);
-  });
-  const grade = good>=7?'매우 양호': good>=5?'양호': good>=3?'보통':'주의';
-  const color = grade.includes('주의')?'var(--bad)': grade.includes('매우')?'var(--good)':'var(--ok)';
-  dom.evalOverall.innerHTML = `종합 평가 : <span style="color:${color}">${grade}</span> · (좋음 ${good}/8)`;
-  dom.evalModal.classList.add('is-open');
+  dom.evalWrap.innerHTML=''; let good=0;
+  ITEMS.forEach(it=>{
+    const last = historyMap[it.key]?.at(-1)?.v ?? '-';
+    const s = statusOf(it.key, Number(last)); if(s==='좋음') good++;
+    const el = document.createElement('div'); el.className='eval-card';
+    el.innerHTML = `
+      <div class="bullet" style="background:${it.color};box-shadow:0 0 0 3px ${it.color}30"></div>
+      <div class="eval-card__title">${it.label}</div>
+      <span class="badge ${badgeClass(s)}" style="margin-left:8px">${s}</span>
+      <div class="eval-card__score">${last} <span style="color:var(--muted);font-size:12px">${it.unit}</span></div>`;
+    dom.evalWrap.appendChild(el);
+  });
+  const grade = good>=7?'매우 양호': good>=5?'양호': good>=3?'보통':'주의';
+  const color = grade.includes('주의')?'var(--bad)': grade.includes('매우')?'var(--good)':'var(--ok)';
+  dom.evalOverall.innerHTML = `종합 평가 : <span style="color:${color}">${grade}</span> · (좋음 ${good}/8)`;
+  dom.evalModal.classList.add('is-open'); dom.evalModal.setAttribute('aria-hidden','false');
 }
-function closeEval(){ dom.evalModal.classList.remove('is-open') }
+function closeEval(){ dom.evalModal.classList.remove('is-open'); dom.evalModal.setAttribute('aria-hidden','true') }
 
-/* 초기화 */
-initCards(); randomInit(); tickOnce(); setInterval(tickOnce, 30*1000);
+/* 초기화 및 이벤트 리스너 */
+initCards(); randomInit(); tickOnce();
+// 30초 간격의 미세 변화 유지
+setInterval(tickOnce, 30*1000);
+
 dom.btnRefresh.addEventListener('click', refreshNow);
 dom.chartClose.addEventListener('click', closeChart);
 dom.chartModal.addEventListener('click', e=>{ if(e.target===dom.chartModal) closeChart() });
