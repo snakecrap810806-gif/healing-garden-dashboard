@@ -7,7 +7,6 @@
 
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
@@ -20,11 +19,11 @@
     --muted:#9eb6ad;
     --heading:#e7f2ef;
     --text:#d4e6e1;
-    --chip-good:#2e7d32;   /* 좋음 */
-    --chip-fair:#377c6b;   /* 양호 */
-    --chip-warn:#bf7e1a;   /* 주의 */
-    --chip-bad:#b23a3a;    /* 위험 */
-    --accent:#67d1a4;      /* 포인트 */
+    --chip-good:#2e7d32;
+    --chip-fair:#377c6b;
+    --chip-warn:#bf7e1a;
+    --chip-bad:#b23a3a;
+    --accent:#67d1a4;
     --shadow: 0 8px 28px rgba(0,0,0,.35);
     --radius:20px;
   }
@@ -40,113 +39,53 @@
     font-family: 'Nanum Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     letter-spacing:.1px;
   }
-  .page{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-  }
-  header{
-    padding:28px 28px 10px;
-  }
-  .title-row{
-    display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;
-  }
-  h1{
-    margin:0;
-    font-weight:800;
-    font-size:42px;
-    color:var(--heading);
-    text-shadow:0 4px 20px rgba(0,0,0,.35);
-  }
-  .meta{
-    font-size:15px;
-    color:var(--muted);
-  }
-  .refresh{
-    margin-left:auto;
-    background:linear-gradient(135deg,#69e0b0,#34c69b);
-    color:#05251c;
-    border:0; border-radius:999px;
-    padding:10px 16px; font-weight:700; cursor:pointer;
-    box-shadow:var(--shadow);
-  }
-  .grid{
-    padding:20px 28px 18px;
-    display:grid; gap:16px;
-    /* 1920×1080 기준 4x2 타일로 꽉 차는 레이아웃 */
-    grid-template-columns: repeat(4, minmax(240px, 1fr));
-  }
+  .page{min-height:100vh; display:flex; flex-direction:column;}
+  header{padding:28px 28px 10px;}
+  .title-row{display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;}
+  h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:0 4px 20px rgba(0,0,0,.35);}
+  .meta{font-size:15px; color:var(--muted);}
+  .refresh{margin-left:auto; background:linear-gradient(135deg,#69e0b0,#34c69b);
+    color:#05251c; border:0; border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer; box-shadow:var(--shadow);}
+  .grid{padding:20px 28px 18px; display:grid; gap:16px; grid-template-columns: repeat(4, minmax(240px, 1fr));}
   .card{
-    position:relative;
-    background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35));
-    border:1px solid var(--card-border);
-    border-radius:var(--radius);
-    box-shadow: var(--shadow);
-    padding:22px;
-    height:260px;            /* 세로 과도 확장 방지 */
-    display:flex; flex-direction:column; justify-content:space-between;
-    overflow:hidden;
+    position:relative; background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35));
+    border:1px solid var(--card-border); border-radius:var(--radius); box-shadow: var(--shadow);
+    padding:18px 18px 10px; height:260px; display:flex; flex-direction:column; overflow:hidden; cursor:pointer;
   }
-  .card::after{
-    /* 구름/가지 느낌의 은은한 장식 */
-    content:""; position:absolute; inset:auto -40% -35% -40%; height:160px;
-    background: radial-gradient(60% 120% at 50% 100%, rgba(103,209,164,.25), transparent 45%);
-    pointer-events:none;
-  }
+  .card::after{content:""; position:absolute; inset:auto -40% -35% -40%; height:160px;
+    background: radial-gradient(60% 120% at 50% 100%, rgba(103,209,164,.25), transparent 45%); pointer-events:none;}
   .kicker{display:flex; align-items:center; gap:10px; color:var(--muted); font-weight:700;}
   .kicker .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); opacity:.75;}
-  .value-row{display:flex; align-items:baseline; gap:12px}
-  .value{font-size:48px; font-weight:800; color:#eaf9f4; letter-spacing:.5px}
-  .unit{font-size:20px; color:var(--muted)}
-  .badge{
-    position:absolute; top:18px; right:18px;
-    font-size:14px; font-weight:700; padding:6px 10px;
-    border-radius:999px; background:#164337; border:1px solid rgba(255,255,255,.06); color:#cde7de;
-  }
+  .value-row{display:flex; align-items:baseline; gap:12px; margin:6px 0 8px;}
+  .value{font-size:44px; font-weight:800; color:#eaf9f4; letter-spacing:.5px}
+  .unit{font-size:18px; color:var(--muted)}
+  .badge{position:absolute; top:14px; right:14px; font-size:13px; font-weight:700; padding:6px 10px;
+    border-radius:999px; background:#164337; border:1px solid rgba(255,255,255,.06); color:#cde7de;}
   .badge.good{background:rgba(46,125,50,.22); color:#bdf4c9; border-color:rgba(189,244,201,.2)}
   .badge.fair{background:rgba(55,124,107,.22); color:#cfeee6}
   .badge.warn{background:rgba(191,126,26,.22); color:#ffe2b8}
   .badge.bad{ background:rgba(178,58,58,.22); color:#ffc7c7}
-  .btn-graph{
-    align-self:flex-end;
-    background:transparent; color:#cfeee6; border:1px dashed rgba(207,238,230,.45);
-    border-radius:12px; padding:8px 12px; cursor:pointer;
-  }
-  /* 종합평가 */
-  .summary{
-    margin:8px 28px 24px;
-    background:linear-gradient(90deg,rgba(103,209,164,.15),rgba(14,53,42,.35));
-    border:1px solid var(--card-border); border-radius:14px; padding:12px 16px;
-    display:flex; align-items:center; gap:12px;
-  }
+  .minititle{font-size:12px; color:var(--muted); margin:0 0 6px 2px}
+  .mini{flex:1; min-height:88px;}
+  .summary{margin:8px 28px 24px; background:linear-gradient(90deg,rgba(103,209,164,.15),rgba(14,53,42,.35));
+    border:1px solid var(--card-border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px;}
   .light{width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 18px var(--accent)}
   .summary strong{color:#eaf9f4}
-  /* Modal */
   .modal{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:50}
   .modal.open{display:flex}
-  .dialog{
-    width:min(1200px,70vw); height:min(720px,70vh);
-    background:linear-gradient(180deg,#0f1916,#0c1613);
-    border:1px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow);
-    display:flex; flex-direction:column;
-  }
+  .dialog{width:min(1200px,70vw); height:min(720px,70vh); background:linear-gradient(180deg,#0f1916,#0c1613);
+    border:1px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow); display:flex; flex-direction:column;}
   .dialog header{padding:16px 18px; display:flex; align-items:center; gap:10px;}
   .dialog h3{margin:0; font-size:18px; color:#dff3ed}
   .dialog .sp{flex:1}
   .dialog .close{background:transparent; color:#b7d7cf; border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:10px; cursor:pointer}
   .dialog .canvas-wrap{flex:1; padding:10px 16px 18px}
   canvas{width:100%; height:100%}
-  /* Footer with 국립정원문화원 */
   footer{border-top:1px solid rgba(255,255,255,.06); padding:18px 24px; display:flex; justify-content:center; background:transparent;}
   .footer-inner{display:flex; align-items:center; gap:12px; color:#BFD3D8; font-size:14px; line-height:1.4; opacity:.9;}
   .footer-logo{height:22px; width:auto; display:block}
-  @media (max-width:1200px){
-    .grid{grid-template-columns: repeat(2, minmax(240px, 1fr));}
-  }
-  @media (max-width:620px){
-    h1{font-size:30px}
-    .grid{grid-template-columns: 1fr}
-  }
+  @media (max-width:1200px){ .grid{grid-template-columns: repeat(2, minmax(240px, 1fr));} }
+  @media (max-width:620px){ h1{font-size:30px} .grid{grid-template-columns: 1fr} }
 </style>
 </head>
 <body>
@@ -159,30 +98,20 @@
     </div>
   </header>
 
-  <main class="grid" id="grid">
-    <!-- 카드들은 JS로 렌더링 -->
-  </main>
+  <main class="grid" id="grid"><!-- JS --></main>
 
   <section class="summary" id="summaryBar">
-    <div class="light"></div>
-    <div id="summaryText">종합 평가 계산 중…</div>
+    <div class="light"></div><div id="summaryText">종합 평가 계산 중…</div>
   </section>
 
-  <!-- Modal for charts -->
+  <!-- Modal -->
   <div class="modal" id="modal">
     <div class="dialog" role="dialog" aria-modal="true">
-      <header>
-        <h3 id="modalTitle">그래프</h3>
-        <div class="sp"></div>
-        <button class="close" id="btnClose">닫기</button>
-      </header>
-      <div class="canvas-wrap">
-        <canvas id="chartCanvas"></canvas>
-      </div>
+      <header><h3 id="modalTitle">그래프</h3><div class="sp"></div><button class="close" id="btnClose">닫기</button></header>
+      <div class="canvas-wrap"><canvas id="chartCanvas"></canvas></div>
     </div>
   </div>
 
-  <!-- Footer -->
   <footer role="contentinfo" aria-label="footer">
     <div class="footer-inner">
       <img class="footer-logo" alt="국립정원문화원 로고"
@@ -193,184 +122,149 @@
 </div>
 
 <script>
-/* -------------------------------
-   구성 & 상태
--------------------------------- */
+/* ================= 기본 설정 ================= */
 const METRICS = [
-  { key:'pm10',  name:'PM10', unit:'µg/m³',  range:[0,120],   good:30,  fair:50,  warn:80 },
-  { key:'pm25',  name:'PM2.5',unit:'µg/m³',  range:[0,80],    good:15,  fair:30,  warn:50 },
-  { key:'co2',   name:'CO₂',  unit:'ppm',   range:[350,1500],good:700, fair:1000,warn:1400},
-  { key:'temp',  name:'온도',  unit:'℃',     range:[-5,35],   good:26,  fair:28,  warn:30,  invert:true },
-  { key:'humi',  name:'습도',  unit:'%RH',   range:[0,100],   good:[40,60], fair:[35,65], warn:[30,70], band:true },
-  { key:'lux',   name:'조도',  unit:'lux',   range:[0,1500],  good:1000,fair:700, warn:400 },
-  { key:'noise', name:'소음',  unit:'dB',    range:[30,85],   good:60,  fair:70,  warn:80,  invert:true },
-  { key:'wind',  name:'풍속',  unit:'m/s',   range:[0,10],    good:5,   fair:7,   warn:9,   invert:true },
+  { key:'pm10',  name:'PM10', unit:'µg/m³',  range:[0,120],   good:30,  fair:50,  warn:80,  color:'#6fe7c1' },
+  { key:'pm25',  name:'PM2.5',unit:'µg/m³',  range:[0,80],    good:15,  fair:30,  warn:50,  color:'#8fd7ff' },
+  { key:'co2',   name:'CO₂',  unit:'ppm',   range:[350,1500],good:700, fair:1000,warn:1400, color:'#f0d96a'},
+  { key:'temp',  name:'온도',  unit:'℃',     range:[-5,35],   good:26,  fair:28,  warn:30,  invert:true, color:'#ffb6a1'},
+  { key:'humi',  name:'습도',  unit:'%RH',   range:[0,100],   good:[40,60], fair:[35,65], warn:[30,70], band:true, color:'#9be6d1'},
+  { key:'lux',   name:'조도',  unit:'lux',   range:[0,1500],  good:1000,fair:700, warn:400, color:'#86ffc8'},
+  { key:'noise', name:'소음',  unit:'dB',    range:[30,85],   good:60,  fair:70,  warn:80,  invert:true, color:'#c9c9ff'},
+  { key:'wind',  name:'풍속',  unit:'m/s',   range:[0,10],    good:5,   fair:7,   warn:9,   invert:true, color:'#c6ffd2'},
 ];
+const HISTORY_LEN = 120;        // 30s * 120 = 60분
+const UPDATE_MS   = 30_000;
 
-const HISTORY_LEN = 120;         // 약 60분(30s x 120)
-const UPDATE_MS   = 30_000;      // 30초 간격
-const STATE = {};                // { metricKey: { value:number, history:[{t,v},..] } }
+const STATE = {};               // { key: { value, history:[{t,v}] } }
+const MINI = {};                // 미니 차트 인스턴스
 
-/* -------------------------------
-   유틸
--------------------------------- */
-const $ = (sel, el=document)=> el.querySelector(sel);
-function nowString(){
-  const d = new Date();
-  return d.toLocaleString('ko-KR', {dateStyle:'medium', timeStyle:'medium'});
-}
+/* ================= 유틸 ================= */
+const $ = (s,e=document)=>e.querySelector(s);
+function nowString(){ return new Date().toLocaleString('ko-KR',{dateStyle:'medium',timeStyle:'medium'}); }
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-function gentleStep(prev, step, min, max){
-  const delta = (Math.random()*2 - 1) * step;
-  return clamp(prev + delta, min, max);
+function gentleStep(prev, step, min, max){ return clamp(prev + (Math.random()*2-1)*step, min, max); }
+function statusOf(m, v){
+  if(m.band){ const [g1,g2]=m.good,[f1,f2]=m.fair,[w1,w2]=m.warn; if(v>=g1&&v<=g2)return'good'; if(v>=f1&&v<=f2)return'fair'; if(v>=w1&&v<=w2)return'warn'; return'bad'; }
+  if(m.invert){ if(v<=m.good)return'good'; if(v<=m.fair)return'fair'; if(v<=m.warn)return'warn'; return'bad'; }
+  if(v<=m.good)return'good'; if(v<=m.fair)return'fair'; if(v<=m.warn)return'warn'; return'bad';
 }
-function statusOf(metric, v){
-  // 밴드(습도) or 일반/invert
-  if(metric.band){
-    const [g1,g2]=metric.good, [f1,f2]=metric.fair, [w1,w2]=metric.warn;
-    if(v>=g1 && v<=g2) return 'good';
-    if(v>=f1 && v<=f2) return 'fair';
-    if(v>=w1 && v<=w2) return 'warn';
-    return 'bad';
-  }
-  if(metric.invert){ // 값 낮을수록 좋음
-    if(v<=metric.good) return 'good';
-    if(v<=metric.fair) return 'fair';
-    if(v<=metric.warn) return 'warn';
-    return 'bad';
-  }else{
-    if(v<=metric.good) return 'good';
-    if(v<=metric.fair) return 'fair';
-    if(v<=metric.warn) return 'warn';
-    return 'bad';
-  }
-}
-const STATUS_TEXT = {good:'좋음', fair:'양호', warn:'주의', bad:'위험'};
-const STATUS_ORDER = {good:0,fair:1,warn:2,bad:3};
+const STATUS_TEXT={good:'좋음', fair:'양호', warn:'주의', bad:'위험'};
+const STATUS_ORDER={good:0,fair:1,warn:2,bad:3};
 
-/* -------------------------------
-   초기 데이터 생성 (온화한 가을 기준)
--------------------------------- */
-function initValue(metric){
-  switch(metric.key){
-    case 'pm10':  return 25 + Math.random()*10;        // 20~35
-    case 'pm25':  return 12 + Math.random()*8;         // 12~20
-    case 'co2':   return 480 + Math.random()*120;      // 480~600
-    case 'temp':  return 17 + Math.random()*3;         // 17~20
-    case 'humi':  return 48 + Math.random()*10;        // 48~58
-    case 'lux':   return 400 + Math.random()*200;      // 400~600
-    case 'noise': return 48 + Math.random()*8;         // 48~56
-    case 'wind':  return 0.8 + Math.random()*0.9;      // 0.8~1.7
-    default:      return 0;
+function initValue(m){
+  switch(m.key){
+    case 'pm10':  return 25+Math.random()*10;
+    case 'pm25':  return 12+Math.random()*8;
+    case 'co2':   return 480+Math.random()*120;
+    case 'temp':  return 17+Math.random()*3;
+    case 'humi':  return 48+Math.random()*10;
+    case 'lux':   return 400+Math.random()*200;
+    case 'noise': return 48+Math.random()*8;
+    case 'wind':  return 0.8+Math.random()*0.9;
+    default: return 0;
   }
 }
-function stepSize(metric){
-  switch(metric.key){
-    case 'pm10':  return 2.2;
-    case 'pm25':  return 1.5;
-    case 'co2':   return 15;
-    case 'temp':  return 0.25;
-    case 'humi':  return 1.2;
-    case 'lux':   return 30;
-    case 'noise': return 1.0;
-    case 'wind':  return 0.15;
-    default:      return 1;
+function stepSize(m){
+  switch(m.key){
+    case 'pm10':return 2.2; case 'pm25':return 1.5; case 'co2':return 15; case 'temp':return 0.25;
+    case 'humi':return 1.2; case 'lux':return 30; case 'noise':return 1.0; case 'wind':return 0.15;
+    default:return 1;
   }
 }
+
+/* ================= 초기화 ================= */
 function initState(){
   METRICS.forEach(m=>{
     const v = initValue(m);
     STATE[m.key] = { value:v, history:[{t:Date.now(), v}] };
   });
 }
-
-/* -------------------------------
-   DOM 렌더
--------------------------------- */
 function cardHTML(m){
   return `
-  <article class="card" data-key="${m.key}" tabindex="0" role="button" aria-label="${m.name} 카드 (그래프 보기)">
-    <div class="kicker"><span class="dot"></span><span>${m.name}</span></div>
-    <div>
+    <article class="card" data-key="${m.key}" aria-label="${m.name} 카드">
+      <div class="kicker"><span class="dot"></span><span>${m.name}</span></div>
       <div class="value-row">
         <span class="value" id="${m.key}-val">--</span>
         <span class="unit">${m.unit}</span>
       </div>
-    </div>
-    <button class="btn-graph" data-graph="${m.key}">그래프</button>
-    <span class="badge" id="${m.key}-badge">--</span>
-  </article>`;
+      <span class="badge" id="${m.key}-badge">--</span>
+      <p class="minititle">최근 추이</p>
+      <div class="mini"><canvas id="${m.key}-mini"></canvas></div>
+    </article>`;
 }
 function renderGrid(){
-  const tpl = METRICS.map(cardHTML).join('');
-  $('#grid').innerHTML = tpl;
-  // 클릭(카드 전체 또는 버튼)
+  $('#grid').innerHTML = METRICS.map(cardHTML).join('');
   $('#grid').addEventListener('click', (e)=>{
-    const btn = e.target.closest('[data-graph]');
-    const card = e.target.closest('.card');
-    if(btn){ openModal(btn.dataset.graph); }
-    else if(card){ openModal(card.dataset.key); }
+    const card = e.target.closest('.card'); if(!card) return;
+    openModal(card.dataset.key);
   });
 }
 
-/* 값/뱃지 업데이트 */
+/* ================= 값/카드/요약 ================= */
+function formatValue(m,v){
+  if(m.key==='wind'||m.key==='temp') return v.toFixed(1);
+  if(['co2','lux'].includes(m.key)) return Math.round(v);
+  if(m.key==='noise') return Math.round(v);
+  return Math.round(v);
+}
 function updateCards(){
   METRICS.forEach(m=>{
     const st = STATE[m.key];
     $('#'+m.key+'-val').textContent = formatValue(m, st.value);
     const s = statusOf(m, st.value);
-    const badge = $('#'+m.key+'-badge');
-    badge.textContent = STATUS_TEXT[s];
-    badge.className = 'badge '+s;
+    const badge = $('#'+m.key+'-badge'); badge.textContent=STATUS_TEXT[s]; badge.className='badge '+s;
   });
-}
-function formatValue(m, v){
-  if(m.key==='wind')  return v.toFixed(1);
-  if(m.key==='temp')  return v.toFixed(1);
-  if(m.key==='noise') return Math.round(v);
-  if(m.key==='co2')   return Math.round(v);
-  if(m.key==='lux')   return Math.round(v);
-  return Math.round(v);
-}
-
-/* -------------------------------
-   주기 업데이트 & 종합평가
--------------------------------- */
-function tick(){
-  METRICS.forEach(m=>{
-    const st = STATE[m.key];
-    const [min,max] = m.range;
-    st.value = gentleStep(st.value, stepSize(m), min, max);
-    st.history.push({t: Date.now(), v: st.value});
-    if(st.history.length > HISTORY_LEN) st.history.shift();
-  });
-  updateCards();
-  updateSummary();
-  $('#nowTxt').textContent = `${new Date().toLocaleString('ko-KR')} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
 }
 function updateSummary(){
-  // 가장 나쁜 상태(순위) 체크 후 문구 생성
-  let worst = 'good';
-  const parts = [];
+  let worst='good'; const parts=[];
   METRICS.forEach(m=>{
     const s = statusOf(m, STATE[m.key].value);
-    if(STATUS_ORDER[s] > STATUS_ORDER[worst]) worst = s;
+    if(STATUS_ORDER[s]>STATUS_ORDER[worst]) worst=s;
     parts.push(`${m.name}:${STATUS_TEXT[s]}`);
   });
-  const overall =
-    worst==='good' ? '쾌적'
-    : worst==='fair' ? '양호'
-    : worst==='warn' ? '주의'
-    : '경고';
+  const overall = worst==='good'?'쾌적':worst==='fair'?'양호':worst==='warn'?'주의':'경고';
   $('#summaryText').innerHTML = `<strong>종합 평가: ${overall}</strong> · ${parts.join(' · ')}`;
 }
 
-/* -------------------------------
-   모달 그래프
--------------------------------- */
+/* ================= 미니 그래프 ================= */
+function buildMini(m){
+  const ctx = $('#'+m.key+'-mini');
+  const st = STATE[m.key];
+  const labels = st.history.map(h=>'');
+  const data = st.history.map(h=>h.v);
+  const [ymin,ymax]=m.range;
+  MINI[m.key] = new Chart(ctx,{
+    type:'line',
+    data:{ labels, datasets:[{ data, borderColor:m.color, backgroundColor:hexToRGBA(m.color,0.18), tension:.3, fill:true, pointRadius:0, borderWidth:2 }] },
+    options:{
+      maintainAspectRatio:false,
+      animation:false,
+      plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+      scales:{ x:{display:false}, y:{display:false, min:ymin, max:ymax} }
+    }
+  });
+}
+function refreshMini(m){
+  const ch = MINI[m.key]; if(!ch) return;
+  const st = STATE[m.key];
+  const hist = st.history.slice(-40);                      // 최근 40포인트만
+  ch.data.labels = hist.map(h=>'');
+  ch.data.datasets[0].data = hist.map(h=>h.v);
+  ch.update('none');
+}
+function initMiniAll(){ METRICS.forEach(buildMini); }
+function refreshMiniAll(){ METRICS.forEach(refreshMini); }
+function hexToRGBA(hex, a){
+  const s = hex.replace('#',''); const bigint = parseInt(s,16);
+  const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255;
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ================= 모달(큰 그래프) ================= */
 let chart, chartMetric;
-function openModal(metricKey){
-  chartMetric = METRICS.find(m=> m.key===metricKey);
+function openModal(key){
+  chartMetric = METRICS.find(m=>m.key===key);
   $('#modalTitle').textContent = `${chartMetric.name} 시간 추이`;
   $('#modal').classList.add('open');
   renderChart(chartMetric);
@@ -378,61 +272,52 @@ function openModal(metricKey){
 $('#btnClose').onclick=()=> $('#modal').classList.remove('open');
 
 function renderChart(m){
-  const ctx = $('#chartCanvas');
-  if(chart){ chart.destroy(); }
-  const labels = STATE[m.key].history.map(h => new Date(h.t).toLocaleTimeString('ko-KR',{hour:'2-digit', minute:'2-digit'}));
-  const data = STATE[m.key].history.map(h => h.v);
-
-  const [ymin,ymax] = m.range;         // y축 고정 → 지나친 증폭 방지
-  const color = '#7fe3bd';
+  const ctx = $('#chartCanvas'); if(chart) chart.destroy();
+  const hist = STATE[m.key].history;
+  const labels = hist.map(h => new Date(h.t).toLocaleTimeString('ko-KR',{hour:'2-digit', minute:'2-digit'}));
+  const data = hist.map(h => h.v);
+  const [ymin,ymax] = m.range;
 
   chart = new Chart(ctx, {
     type:'line',
-    data:{
-      labels,
-      datasets:[{
-        label: `${m.name}`,
-        data,
-        borderColor: color,
-        backgroundColor: 'rgba(127,227,189,.18)',
-        tension:.25, fill:true, pointRadius:0, borderWidth:2
-      }]
-    },
+    data:{ labels, datasets:[{ label:m.name, data, borderColor:m.color, backgroundColor:hexToRGBA(m.color,.18), tension:.25, fill:true, pointRadius:0, borderWidth:2 }] },
     options:{
       maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{mode:'index', intersect:false}
-      },
+      plugins:{ legend:{display:false}, tooltip:{mode:'index', intersect:false} },
       scales:{
-        x:{
-          ticks:{ color:'#a9c9c0' },
-          grid:{ color:'rgba(255,255,255,.06)'}
-        },
-        y:{
-          min:ymin, max:ymax,
-          ticks:{ color:'#a9c9c0' },
-          grid:{ color:'rgba(255,255,255,.06)'}
-        }
+        x:{ ticks:{color:'#a9c9c0'}, grid:{color:'rgba(255,255,255,.06)'} },
+        y:{ min:ymin, max:ymax, ticks:{color:'#a9c9c0'}, grid:{color:'rgba(255,255,255,.06)'} }
       }
     }
   });
 }
 
-/* -------------------------------
-   초기화
--------------------------------- */
+/* ================= 주기 업데이트 ================= */
+function tick(){
+  METRICS.forEach(m=>{
+    const st=STATE[m.key], [min,max]=m.range;
+    st.value = gentleStep(st.value, stepSize(m), min, max);
+    st.history.push({t:Date.now(), v:st.value});
+    if(st.history.length>HISTORY_LEN) st.history.shift();
+  });
+  updateCards();
+  updateSummary();
+  refreshMiniAll();
+  $('#nowTxt').textContent = `${new Date().toLocaleString('ko-KR')} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
+}
+
+/* ================= 시작 ================= */
 initState();
 renderGrid();
 updateCards();
 updateSummary();
+initMiniAll();
+refreshMiniAll();
 $('#nowTxt').textContent = `${nowString()} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
-
 let timer = setInterval(tick, UPDATE_MS);
-$('#btnRefresh').onclick = ()=>{ tick(); };
-
-/* 접근성: ESC로 모달 닫기 */
-window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') $('#modal').classList.remove('open'); });
+$('#btnRefresh').onclick=()=> tick();
+/* ESC 닫기 */
+window.addEventListener('keydown',(e)=>{ if(e.key==='Escape') $('#modal').classList.remove('open'); });
 </script>
 </body>
 </html>
