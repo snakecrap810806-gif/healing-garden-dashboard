@@ -3,363 +3,334 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>디지털 치유정원 · 실시간 환경 대시보드</title>
+<title>디지털 치유정원 · 실시간 환경 대시보드 (안전버전)</title>
 <style>
 :root{
-  --bg:#0f1614; --panel:#111b18; --card:#11201b; --card-border:rgba(255,255,255,.06);
+  --bg:#0f1614; --panel:#111b18; --card:#11201b; --border:rgba(255,255,255,.08);
   --muted:#9eb6ad; --heading:#e7f2ef; --text:#d4e6e1; --accent:#67d1a4;
-  --shadow:0 8px 28px rgba(0,0,0,.35); --radius:20px;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
-  background:
-    radial-gradient(1200px 600px at 15% -10%, #123428 0%, transparent 60%),
-    radial-gradient(1100px 700px at 100% -20%, #0e2a22 0%, transparent 65%),
-    var(--bg);
-}
-.page{min-height:100vh; display:flex; flex-direction:column}
-header{padding:28px 28px 10px}
-.title-row{display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap}
-h1{margin:0; font-weight:800; font-size:42px; color:var(--heading); text-shadow:0 4px 20px rgba(0,0,0,.35)}
-.meta{font-size:15px; color:var(--muted)}
-.actions{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
-.btn{
-  background:linear-gradient(135deg,#69e0b0,#34c69b);
-  color:#05251c; border:0; border-radius:999px; padding:10px 16px; font-weight:800; cursor:pointer; box-shadow:var(--shadow)
-}
-.btn.secondary{background:transparent; color:#d6ece6; border:1px solid rgba(214,236,230,.35)}
-.grid{padding:20px 28px 18px; display:grid; gap:16px; grid-template-columns:repeat(4,minmax(240px,1fr))}
-.card{
-  position:relative; background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35));
-  border:1px solid var(--card-border); border-radius:var(--radius); box-shadow:var(--shadow);
-  padding:18px 18px 12px; height:270px; display:flex; flex-direction:column; overflow:hidden;
-}
-.card::after{content:""; position:absolute; inset:auto -40% -35% -40%; height:160px;
-  background:radial-gradient(60% 120% at 50% 100%, rgba(103,209,164,.22), transparent 45%); pointer-events:none}
-.kicker{display:flex; align-items:center; gap:10px; color:#d6ece6; font-weight:900; font-size:26px} /* ← 2배 키움 */
-.kicker .dot{width:12px; height:12px; border-radius:50%; background:var(--accent); opacity:.85}
-.value-row{display:flex; align-items:baseline; gap:12px; margin:8px 0 10px}
-.value{font-size:44px; font-weight:800; color:#eaf9f4; letter-spacing:.5px}
-.unit{font-size:18px; color:var(--muted)}
-.badge{position:absolute; top:14px; right:14px; font-size:13px; font-weight:700; padding:6px 10px; border-radius:999px;
-  background:#164337; border:1px solid rgba(255,255,255,.06); color:#cde7de}
-.badge.good{background:rgba(46,125,50,.22); color:#bdf4c9; border-color:rgba(189,244,201,.2)}
-.badge.fair{background:rgba(55,124,107,.22); color:#cfeee6}
-.badge.warn{background:rgba(191,126,26,.22); color:#ffe2b8}
-.badge.bad {background:rgba(178,58,58,.22); color:#ffc7c7}
-.minititle{font-size:12px; color:var(--muted); margin:0 0 6px 2px}
-.mini{flex:1; min-height:95px; background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
-  border:2px solid rgba(255,255,255,.85); border-radius:12px; padding:6px; overflow:hidden; display:flex; align-items:center; justify-content:center}
-.btn-graph{margin-top:8px; align-self:flex-end; font-weight:800; font-size:12px;
-  background:transparent; color:#d6ece6; border:1px solid rgba(255,255,255,.28); border-radius:12px; padding:6px 10px; cursor:pointer}
-.btn-graph:hover{background:rgba(255,255,255,.06)}
-.modal,.overlay{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:50}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;background:#0f1614}
+.page{min-height:100vh;display:flex;flex-direction:column}
+header{padding:24px}
+h1{margin:0 0 6px 0;font-size:34px;color:var(--heading)}
+.meta{color:var(--muted);font-size:14px}
+.actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:#67d1a4;color:#062a1f;border:0;border-radius:999px;padding:8px 14px;font-weight:800;cursor:pointer}
+.btn.secondary{background:transparent;color:#d6ece6;border:1px solid var(--border)}
+.grid{padding:16px;display:grid;gap:12px;grid-template-columns:repeat(4,minmax(220px,1fr))}
+.card{background:#12281f;border:1px solid var(--border);border-radius:16px;padding:14px;height:240px;display:flex;flex-direction:column;overflow:hidden}
+.kicker{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px}
+.kicker .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.value-row{display:flex;gap:10px;align-items:baseline;margin:6px 0}
+.value{font-size:36px;font-weight:800;color:#eaf9f4}
+.unit{font-size:16px;color:var(--muted)}
+.badge{margin-left:auto;font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#183d32;color:#cde7de}
+.badge.good{background:rgba(46,125,50,.22);color:#bdf4c9}
+.badge.fair{background:rgba(55,124,107,.22);color:#cfeee6}
+.badge.warn{background:rgba(191,126,26,.22);color:#ffe2b8}
+.badge.bad {background:rgba(178,58,58,.22);color:#ffc7c7}
+.minititle{font-size:12px;color:var(--muted);margin:0 0 4px 2px}
+.mini{flex:1;border:2px solid rgba(255,255,255,.85);border-radius:10px;padding:4px;display:flex;align-items:center;justify-content:center}
+.mini canvas{width:100%;height:100%}
+.btn-graph{margin-top:6px;align-self:flex-end;background:transparent;color:#d6ece6;border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.modal,.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50}
 .modal.open,.overlay.open{display:flex}
 .modal{background:rgba(0,0,0,.55)}
-.overlay{background:rgba(0,0,0,.7)}
-.dialog,.board{
-  width:min(1200px,70vw); height:min(720px,70vh);
-  background:linear-gradient(180deg,#0f1916,#0c1613); border:1px solid rgba(255,255,255,.08); border-radius:18px;
-  box-shadow:0 16px 40px rgba(0,0,0,.5); display:flex; flex-direction:column
-}
-.board{width:min(1400px,92vw); height:min(820px,88vh)}
-.dialog header,.board header{padding:16px 18px; display:flex; align-items:center; gap:10px}
-.dialog h3,.board h3{margin:0; font-size:18px; color:#dff3ed}
-.dialog .sp,.board .sp{flex:1}
-.close{background:transparent; color:#b7d7cf; border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:10px; cursor:pointer}
-.canvas-wrap{flex:1; padding:10px 16px 18px; position:relative}
-#chartTip{position:absolute; display:none; padding:6px 8px; border-radius:8px; background:rgba(0,0,0,.7); color:#e7f2ef; font-size:12px; pointer-events:none}
-.tiles{flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:10px 14px}
-.tile{background:linear-gradient(180deg,rgba(18,40,32,.6),rgba(18,40,32,.35)); border:1px solid rgba(255,255,255,.06);
-  border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:4px}
-.tile .name{font-weight:800; color:#d6ece6; font-size:18px}
-.tile .num{font-weight:800; font-size:34px; color:#eaf9f4}
-.tag{margin-left:auto; font-size:12px; font-weight:800; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.2)}
-.tag.good{background:rgba(46,125,50,.22); color:#bdf4c9}
-.tag.fair{background:rgba(55,124,107,.22); color:#cfeee6}
-.tag.warn{background:rgba(191,126,26,.22); color:#ffe2b8}
-.tag.bad{ background:rgba(178,58,58,.22); color:#ffc7c7}
-.tile canvas{height:52px!important}
-.badge-big{margin:8px 14px 0; background:linear-gradient(135deg,rgba(103,209,164,.18),rgba(51,141,112,.18));
-  border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; font-weight:800; color:#e7f7f0}
-footer{border-top:1px solid rgba(255,255,255,.06); padding:18px 24px; display:flex; justify-content:center}
-.footer-inner{display:flex; align-items:center; gap:12px; color:#BFD3D8; font-size:14px; line-height:1.4; opacity:.9}
-.footer-logo{height:22px; width:auto; display:block}
-.logo-fallback{font-weight:800; color:#e7f2ef}
-@media (max-width:1200px){ .grid{grid-template-columns:repeat(2,minmax(240px,1fr))} .tiles{grid-template-columns:repeat(2,1fr)} }
-@media (max-width:620px){ h1{font-size:30px} .grid{grid-template-columns:1fr} .tiles{grid-template-columns:1fr} }
+.dialog,.board{width:min(1200px,70vw);height:min(720px,70vh);background:#0f1916;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column}
+.board{width:min(1400px,92vw);height:min(820px,88vh)}
+.dialog header,.board header{padding:12px 14px;display:flex;align-items:center;gap:8px}
+.dialog h3,.board h3{margin:0;font-size:18px}
+.sp{flex:1}
+.close{background:transparent;color:#b7d7cf;border:1px solid var(--border);padding:6px 10px;border-radius:10px;cursor:pointer}
+.canvas-wrap{flex:1;padding:8px 12px;position:relative}
+#chartTip{position:absolute;display:none;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.7);color:#e7f2ef;font-size:12px}
+.tiles{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 14px}
+.tile{background:#12281f;border:1px solid var(--border);border-radius:12px;padding:12px}
+.tile .name{font-weight:800;color:#d6ece6;font-size:16px}
+.tile .num{font-weight:800;font-size:28px;color:#eaf9f4}
+.tag{margin-left:8px;font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--border)}
+.tag.good{background:rgba(46,125,50,.22);color:#bdf4c9}
+.tag.fair{background:rgba(55,124,107,.22);color:#cfeee6}
+.tag.warn{background:rgba(191,126,26,.22);color:#ffe2b8}
+.tag.bad{ background:rgba(178,58,58,.22);color:#ffc7c7}
+.tile canvas{height:48px!important;width:100%}
+.badge-big{margin:8px 14px;background:rgba(103,209,164,.18);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-weight:800;color:#e7f7f0}
+footer{border-top:1px solid var(--border);padding:12px 18px;display:flex;justify-content:center}
+.footer-inner{display:flex;align-items:center;gap:10px;color:#BFD3D8;font-size:14px}
+.footer-logo{height:20px}
+.err{display:none;position:fixed;left:0;right:0;top:0;padding:10px 14px;background:#7a1b1b;color:#fff;font-weight:800;z-index:100}
+.err.show{display:block}
+@media (max-width:1200px){.grid{grid-template-columns:repeat(2,minmax(220px,1fr))}.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<div id="err" class="err">스크립트 오류가 감지되었습니다. 브라우저 콘솔(F12 ▸ Console)을 캡처해 주세요.</div>
 <div class="page">
   <header>
-    <div class="title-row">
-      <h1>디지털 치유정원 · 실시간 환경 대시보드</h1>
-      <div class="meta" id="nowTxt">로딩 중…</div>
-      <div class="actions">
-        <button class="btn secondary" id="btnMonitor">모니터링</button>
-        <button class="btn" id="btnOverall">종합평가</button>
-        <button class="btn" id="btnRefresh">지금 새로고침</button>
-      </div>
+    <h1>디지털 치유정원 · 실시간 환경 대시보드</h1>
+    <div class="meta" id="nowTxt">초기화 중…</div>
+    <div class="actions">
+      <button class="btn secondary" id="btnMonitor">모니터링</button>
+      <button class="btn" id="btnOverall">종합평가</button>
+      <button class="btn" id="btnRefresh">지금 새로고침</button>
     </div>
   </header>
 
   <main class="grid" id="grid">
-    <!-- 카드 8개(제목 원·값·미니그래프·그래프 버튼) -->
-    <article class="card" data-key="pm10"><div class="kicker"><span class="dot"></span><span>PM10</span></div>
+    <!-- 스크립트가 아예 막혀도 기본 UI가 보이도록 정적 마크업 + placeholder -->
+    <!-- 카드 8개 -->
+    <!-- 1 -->
+    <article class="card" data-key="pm10"><div class="kicker"><span class="dot"></span><span>PM10</span><span class="badge" id="pm10-badge">--</span></div>
       <div class="value-row"><span class="value" id="pm10-val">--</span><span class="unit">µg/m³</span></div>
-      <span class="badge" id="pm10-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="pm10-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="pm10-mini"></canvas></div>
       <button class="btn-graph" data-open="pm10">그래프</button></article>
-
-    <article class="card" data-key="pm25"><div class="kicker"><span class="dot"></span><span>PM2.5</span></div>
+    <!-- 2 -->
+    <article class="card" data-key="pm25"><div class="kicker"><span class="dot"></span><span>PM2.5</span><span class="badge" id="pm25-badge">--</span></div>
       <div class="value-row"><span class="value" id="pm25-val">--</span><span class="unit">µg/m³</span></div>
-      <span class="badge" id="pm25-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="pm25-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="pm25-mini"></canvas></div>
       <button class="btn-graph" data-open="pm25">그래프</button></article>
-
-    <article class="card" data-key="co2"><div class="kicker"><span class="dot"></span><span>CO₂</span></div>
+    <!-- 3 -->
+    <article class="card" data-key="co2"><div class="kicker"><span class="dot"></span><span>CO₂</span><span class="badge" id="co2-badge">--</span></div>
       <div class="value-row"><span class="value" id="co2-val">--</span><span class="unit">ppm</span></div>
-      <span class="badge" id="co2-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="co2-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="co2-mini"></canvas></div>
       <button class="btn-graph" data-open="co2">그래프</button></article>
-
-    <article class="card" data-key="temp"><div class="kicker"><span class="dot"></span><span>온도</span></div>
+    <!-- 4 -->
+    <article class="card" data-key="temp"><div class="kicker"><span class="dot"></span><span>온도</span><span class="badge" id="temp-badge">--</span></div>
       <div class="value-row"><span class="value" id="temp-val">--</span><span class="unit">℃</span></div>
-      <span class="badge" id="temp-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="temp-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="temp-mini"></canvas></div>
       <button class="btn-graph" data-open="temp">그래프</button></article>
-
-    <article class="card" data-key="humi"><div class="kicker"><span class="dot"></span><span>습도</span></div>
+    <!-- 5 -->
+    <article class="card" data-key="humi"><div class="kicker"><span class="dot"></span><span>습도</span><span class="badge" id="humi-badge">--</span></div>
       <div class="value-row"><span class="value" id="humi-val">--</span><span class="unit">%RH</span></div>
-      <span class="badge" id="humi-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="humi-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="humi-mini"></canvas></div>
       <button class="btn-graph" data-open="humi">그래프</button></article>
-
-    <article class="card" data-key="lux"><div class="kicker"><span class="dot"></span><span>조도</span></div>
+    <!-- 6 -->
+    <article class="card" data-key="lux"><div class="kicker"><span class="dot"></span><span>조도</span><span class="badge" id="lux-badge">--</span></div>
       <div class="value-row"><span class="value" id="lux-val">--</span><span class="unit">lux</span></div>
-      <span class="badge" id="lux-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="lux-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="lux-mini"></canvas></div>
       <button class="btn-graph" data-open="lux">그래프</button></article>
-
-    <article class="card" data-key="noise"><div class="kicker"><span class="dot"></span><span>소음</span></div>
+    <!-- 7 -->
+    <article class="card" data-key="noise"><div class="kicker"><span class="dot"></span><span>소음</span><span class="badge" id="noise-badge">--</span></div>
       <div class="value-row"><span class="value" id="noise-val">--</span><span class="unit">dB</span></div>
-      <span class="badge" id="noise-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="noise-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="noise-mini"></canvas></div>
       <button class="btn-graph" data-open="noise">그래프</button></article>
-
-    <article class="card" data-key="wind"><div class="kicker"><span class="dot"></span><span>풍속</span></div>
+    <!-- 8 -->
+    <article class="card" data-key="wind"><div class="kicker"><span class="dot"></span><span>풍속</span><span class="badge" id="wind-badge">--</span></div>
       <div class="value-row"><span class="value" id="wind-val">--</span><span class="unit">m/s</span></div>
-      <span class="badge" id="wind-badge">--</span><p class="minititle">최근 추이</p><div class="mini"><canvas id="wind-mini"></canvas></div>
+      <p class="minititle">최근 추이</p><div class="mini"><canvas id="wind-mini"></canvas></div>
       <button class="btn-graph" data-open="wind">그래프</button></article>
   </main>
 
-  <!-- 70% 팝업 그래프 -->
-  <div class="modal" id="modal">
-    <div class="dialog">
-      <header><h3 id="modalTitle">그래프</h3><div class="sp"></div><button class="close" id="btnClose">닫기</button></header>
-      <div class="canvas-wrap"><canvas id="chartCanvas"></canvas><div id="chartTip"></div></div>
-    </div>
-  </div>
+  <!-- 팝업 그래프 -->
+  <div class="modal" id="modal"><div class="dialog">
+    <header><h3 id="modalTitle">그래프</h3><div class="sp"></div><button class="close" id="btnClose">닫기</button></header>
+    <div class="canvas-wrap"><canvas id="chartCanvas"></canvas><div id="chartTip"></div></div>
+  </div></div>
 
-  <!-- 모니터링(8개 한눈) -->
+  <!-- 모니터링 -->
   <div class="overlay" id="monitor"><div class="board">
-    <header><h3>실시간 모니터링 보드</h3><div class="sp"></div><button class="close" id="btnMonClose">닫기</button></header>
+    <header><h3>실시간 모니터링</h3><div class="sp"></div><button class="close" id="btnMonClose">닫기</button></header>
     <div class="tiles" id="tiles"></div>
   </div></div>
 
-  <!-- 종합평가(클릭 시 상세) -->
+  <!-- 종합평가 -->
   <div class="overlay" id="overall"><div class="board">
     <header><h3>종합 평가 결과</h3><div class="sp"></div><button class="close" id="btnOvClose">닫기</button></header>
-    <div class="badge-big" id="overallBadge">종합 평가 계산 중…</div>
+    <div class="badge-big" id="overallBadge">계산 중…</div>
     <div class="tiles" id="ovTiles"></div>
   </div></div>
 
   <footer>
     <div class="footer-inner">
-      <!-- 로고 시도(같은 폴더에 logo_white.png가 있으면 자동 표시, 없으면 텍스트 폴백) -->
       <img class="footer-logo" id="footerLogo" alt="" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='inline-block';">
-      <span id="logoFallback" class="logo-fallback" style="display:none;">국립정원문화원</span>
-      <span>· Healing Garden · Dark Forest UI (single-file demo)</span>
+      <span id="logoFallback" style="display:none;font-weight:800;color:#e7f2ef">국립정원문화원</span>
+      <span>· Healing Garden · Dark Forest UI</span>
     </div>
   </footer>
 </div>
 
 <script>
-/* ===== 설정/유틸 ===== */
-const $=(s,e=document)=>e.querySelector(s);
-const METRICS=[
-  {key:'pm10',  name:'PM10', unit:'µg/m³', range:[0,120],   good:30,  fair:50,  warn:80,   color:'#6fe7c1'},
-  {key:'pm25',  name:'PM2.5',unit:'µg/m³', range:[0,80],    good:15,  fair:30,  warn:50,   color:'#8fd7ff'},
-  {key:'co2',   name:'CO₂',  unit:'ppm',  range:[350,1500], good:700, fair:1000,warn:1400, color:'#f0d96a'},
-  {key:'temp',  name:'온도',  unit:'℃',    range:[-5,35],   good:26,  fair:28,  warn:30,   invert:true, color:'#ffb6a1'},
-  {key:'humi',  name:'습도',  unit:'%RH',  range:[0,100],   good:[40,60], fair:[35,65], warn:[30,70], band:true, color:'#9be6d1'},
-  {key:'lux',   name:'조도',  unit:'lux',  range:[0,1500],  good:1000,fair:700, warn:400, color:'#86ffc8'},
-  {key:'noise', name:'소음',  unit:'dB',   range:[30,85],   good:60,  fair:70,  warn:80,   invert:true, color:'#c9c9ff'},
-  {key:'wind',  name:'풍속',  unit:'m/s',  range:[0,10],    good:5,   fair:7,   warn:9,    invert:true, color:'#c6ffd2'},
-];
-const STATUS_TEXT={good:'좋음', fair:'양호', warn:'주의', bad:'위험'};
-const STATUS_ORDER={good:0,fair:1,warn:2,bad:3};
-const HISTORY_LEN=120, UPDATE_MS=30000, PRESEED=60;
-const STATE={};
+/* ── 폴리필(구형 브라우저 안전) ───────────────────────────── */
+if(!Array.prototype.at){ Array.prototype.at=function(n){ n=Math.trunc(n)||0; if(n<0) n+=this.length; if(n<0||n>=this.length) return undefined; return this[n]; }; }
 
-const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-const gentle=(prev,step,min,max)=>clamp(prev+(Math.random()*2-1)*step,min,max);
-const fmt=(m,v)=> (['co2','lux','noise'].includes(m.key)?Math.round(v):(m.key==='temp'||m.key==='wind')?v.toFixed(1):Math.round(v));
-const nowString=()=>new Date().toLocaleString('ko-KR',{dateStyle:'medium',timeStyle:'medium'});
+/* ── 에러 표시 ─────────────────────────────────────────────── */
+function showErr(msg){ var el=document.getElementById('err'); el.textContent='오류: '+msg; el.classList.add('show'); }
+
+/* ── 공통 유틸 ─────────────────────────────────────────────── */
+function $(s,root){ return (root||document).querySelector(s); }
+var METRICS=[
+  {key:'pm10', name:'PM10', unit:'µg/m³', range:[0,120],  good:30,  fair:50,  warn:80,  color:'#6fe7c1'},
+  {key:'pm25', name:'PM2.5',unit:'µg/m³', range:[0,80],   good:15,  fair:30,  warn:50,  color:'#8fd7ff'},
+  {key:'co2',  name:'CO₂',  unit:'ppm',  range:[350,1500],good:700, fair:1000,warn:1400,color:'#f0d96a'},
+  {key:'temp', name:'온도',  unit:'℃',   range:[-5,35],  good:26,  fair:28,  warn:30,  invert:true, color:'#ffb6a1'},
+  {key:'humi', name:'습도',  unit:'%RH', range:[0,100],  good:[40,60],fair:[35,65],warn:[30,70],band:true,color:'#9be6d1'},
+  {key:'lux',  name:'조도',  unit:'lux', range:[0,1500], good:1000,fair:700,warn:400,color:'#86ffc8'},
+  {key:'noise',name:'소음',  unit:'dB',  range:[30,85],  good:60,  fair:70,  warn:80,  invert:true,color:'#c9c9ff'},
+  {key:'wind', name:'풍속',  unit:'m/s', range:[0,10],   good:5,   fair:7,   warn:9,   invert:true,color:'#c6ffd2'}
+];
+var STATUS_TEXT={good:'좋음',fair:'양호',warn:'주의',bad:'위험'};
+var STATUS_ORDER={good:0,fair:1,warn:2,bad:3};
+var STATE={};
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+function gentle(prev,step,min,max){ return clamp(prev+(Math.random()*2-1)*step,min,max); }
+function fmt(m,v){ if(m.key==='temp'||m.key==='wind') return v.toFixed(1); if(m.key==='co2'||m.key==='lux'||m.key==='noise') return Math.round(v); return Math.round(v); }
+function nowString(){ try{ return new Date().toLocaleString('ko-KR',{dateStyle:'medium',timeStyle:'medium'}); }catch(e){ return new Date().toLocaleString(); } }
 function statusOf(m,v){
-  if(m.band){ const[g1,g2]=m.good,[f1,f2]=m.fair,[w1,w2]=m.warn; if(v>=g1&&v<=g2)return'good'; if(v>=f1&&v<=f2)return'fair'; if(v>=w1&&v<=w2)return'warn'; return'bad'; }
+  if(m.band){ var g=m.good,f=m.fair,w=m.warn;
+    if(v>=g[0]&&v<=g[1])return'good'; if(v>=f[0]&&v<=f[1])return'fair'; if(v>=w[0]&&v<=w[1])return'warn'; return'bad'; }
   if(m.invert){ if(v<=m.good)return'good'; if(v<=m.fair)return'fair'; if(v<=m.warn)return'warn'; return'bad'; }
   if(v<=m.good)return'good'; if(v<=m.fair)return'fair'; if(v<=m.warn)return'warn'; return'bad';
 }
 
-/* ===== 스파크라인(미니 그래프) ===== */
+/* ── 미니 그래프(Canvas) ───────────────────────────────────── */
 function spark(canvas, values, ymin, ymax, color){
-  const w=canvas.clientWidth||10, h=canvas.clientHeight||10;
-  if(canvas.width!==w) canvas.width=w;
-  if(canvas.height!==h) canvas.height=h;
-  const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,w,h);
-  if(!values.length){ ctx.fillStyle='#9eb6ad'; ctx.fillText('데이터 없음',8,h/2); return; }
-  const pad=6, step=(w-pad*2)/Math.max(1,values.length-1);
-  const toY=v=>h-pad-((v-ymin)/(ymax-ymin))*(h-pad*2);
-  ctx.lineWidth=2; ctx.strokeStyle=color; ctx.fillStyle=color;
-  // area
-  ctx.beginPath(); ctx.moveTo(pad,toY(values[0]));
-  for(let i=1;i<values.length;i++) ctx.lineTo(pad+i*step,toY(values[i]));
-  ctx.lineTo(pad+(values.length-1)*step,h-pad); ctx.lineTo(pad,h-pad); ctx.closePath();
-  ctx.globalAlpha=.18; ctx.fill(); ctx.globalAlpha=1;
-  // line
-  ctx.beginPath(); ctx.moveTo(pad,toY(values[0]));
-  for(let i=1;i<values.length;i++) ctx.lineTo(pad+i*step,toY(values[i]));
-  ctx.stroke();
+  try{
+    var w=canvas.clientWidth||200, h=canvas.clientHeight||70;
+    if(canvas.width!==w) canvas.width=w; if(canvas.height!==h) canvas.height=h;
+    var ctx=canvas.getContext('2d'); ctx.clearRect(0,0,w,h);
+    if(!values||!values.length){ ctx.fillStyle='#9eb6ad'; ctx.fillText('데이터 없음',8,h/2); return; }
+    var pad=6, step=(w-pad*2)/Math.max(1,values.length-1);
+    function toY(v){ return h-pad-((v-ymin)/(ymax-ymin))*(h-pad*2); }
+    ctx.lineWidth=2; ctx.strokeStyle=color; ctx.fillStyle=color;
+    ctx.beginPath(); ctx.moveTo(pad,toY(values[0]));
+    for(var i=1;i<values.length;i++) ctx.lineTo(pad+i*step,toY(values[i]));
+    ctx.lineTo(pad+(values.length-1)*step,h-pad); ctx.lineTo(pad,h-pad); ctx.closePath();
+    ctx.globalAlpha=.18; ctx.fill(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.moveTo(pad,toY(values[0]));
+    for(i=1;i<values.length;i++) ctx.lineTo(pad+i*step,toY(values[i])); ctx.stroke();
+  }catch(e){ showErr('미니 그래프 오류: '+e.message); }
 }
 
-/* ===== 초기 데이터 시드 ===== */
+/* ── 초기 데이터 ────────────────────────────────────────────── */
 function seed(){
-  const now=Date.now();
-  METRICS.forEach(m=>{
-    let v = ({pm10:28,pm25:15,co2:520,temp:18.5,humi:55,lux:520,noise:52,wind:1.2})[m.key] || 0;
-    const step=({pm10:2.2,pm25:1.5,co2:15,temp:.25,humi:1.2,lux:30,noise:1.0,wind:.15})[m.key];
-    const st={value:v, history:[]}; const [min,max]=m.range;
-    for(let i=PRESEED;i>0;i--){ v=gentle(v,step,min,max); st.history.unshift({t:now-i*UPDATE_MS,v}); }
+  var base={pm10:28,pm25:15,co2:520,temp:18.5,humi:55,lux:520,noise:52,wind:1.2};
+  var stepMap={pm10:2.2,pm25:1.5,co2:15,temp:.25,humi:1.2,lux:30,noise:1.0,wind:.15};
+  var PRE=60, now=Date.now();
+  METRICS.forEach(function(m){
+    var v=base[m.key], st={value:v,history:[]}, min=m.range[0], max=m.range[1], step=stepMap[m.key];
+    for(var i=PRE;i>0;i--){ v=gentle(v,step,min,max); st.history.unshift({t:now-i*30000,v:v}); }
     st.value=v; STATE[m.key]=st;
   });
 }
 
-/* ===== 카드/보드/평가 렌더 ===== */
+/* ── 렌더링 ─────────────────────────────────────────────────── */
 function updateCards(){
-  METRICS.forEach(m=>{
-    const st=STATE[m.key];
-    $('#'+m.key+'-val').textContent = fmt(m,st.value);
-    const s=statusOf(m,st.value); const b=$('#'+m.key+'-badge');
-    b.textContent=STATUS_TEXT[s]; b.className='badge '+s;
-    spark($('#'+m.key+'-mini'), st.history.slice(-40).map(h=>h.v), m.range[0],m.range[1], m.color);
-  });
-  $('#nowTxt').textContent = `${nowString()} 기준 · ${Math.round(UPDATE_MS/1000)}초 간격 업데이트`;
+  try{
+    METRICS.forEach(function(m){
+      var st=STATE[m.key];
+      var vEl=document.getElementById(m.key+'-val'); if(vEl) vEl.textContent=fmt(m,st.value);
+      var bEl=document.getElementById(m.key+'-badge'); if(bEl){ var s=statusOf(m,st.value); bEl.textContent=STATUS_TEXT[s]; bEl.className='badge '+s; }
+      var c=document.getElementById(m.key+'-mini'); if(c) spark(c, st.history.slice(-40).map(function(h){return h.v}), m.range[0],m.range[1], m.color);
+    });
+    var now=document.getElementById('nowTxt'); if(now) now.textContent= nowString()+' 기준 · 30초 간격 업데이트';
+  }catch(e){ showErr('카드 렌더 오류: '+e.message); }
 }
 function tileHTML(prefix,m){
-  return `<div class="tile">
-    <div style="display:flex;gap:8px;align-items:center"><span class="name">${m.name}</span>
-      <span class="tag" id="${prefix}${m.key}-tag">--</span></div>
-    <div class="num" id="${prefix}${m.key}-val">--</div>
-    <canvas id="${prefix}${m.key}-mini"></canvas></div>`;
+  return '<div class="tile"><div style="display:flex;align-items:center;gap:8px"><span class="name">'+m.name+
+    '</span><span class="tag" id="'+prefix+m.key+'-tag">--</span></div>'+
+    '<div class="num" id="'+prefix+m.key+'-val">--</div><canvas id="'+prefix+m.key+'-mini"></canvas></div>';
 }
-function buildBoard(){ $('#tiles').innerHTML = METRICS.map(m=>tileHTML('board-',m)).join(''); refreshBoard(); }
+function buildBoard(){ $('#tiles').innerHTML = METRICS.map(function(m){return tileHTML('board-',m)}).join(''); refreshBoard(); }
 function refreshBoard(){
-  METRICS.forEach(m=>{
-    const st=STATE[m.key];
+  METRICS.forEach(function(m){
+    var st=STATE[m.key];
     $('#board-'+m.key+'-val').textContent = fmt(m,st.value)+' '+m.unit;
-    const s=statusOf(m,st.value); const t=$('#board-'+m.key+'-tag'); t.textContent=STATUS_TEXT[s]; t.className='tag '+s;
-    spark($('#board-'+m.key+'-mini'), st.history.slice(-40).map(h=>h.v), m.range[0],m.range[1], m.color);
+    var s=statusOf(m,st.value), t=$('#board-'+m.key+'-tag'); t.textContent=STATUS_TEXT[s]; t.className='tag '+s;
+    spark($('#board-'+m.key+'-mini'), st.history.slice(-40).map(function(h){return h.v}), m.range[0],m.range[1], m.color);
   });
 }
+function buildOverall(){ $('#ovTiles').innerHTML = METRICS.map(function(m){return tileHTML('ov-',m)}).join(''); refreshOverall(); }
 function overallBadge(){
-  let worst='good', parts=[];
-  METRICS.forEach(m=>{ const s=statusOf(m,STATE[m.key].value); if(STATUS_ORDER[s]>STATUS_ORDER[worst]) worst=s;
-    parts.push(`${m.name}:${STATUS_TEXT[s]}`); });
-  const overall= worst==='good'?'쾌적':worst==='fair'?'양호':worst==='warn'?'주의':'경고';
-  return {overall, detail:parts.join(' · ')};
+  var worst='good', parts=[];
+  METRICS.forEach(function(m){
+    var s=statusOf(m,STATE[m.key].value);
+    if( ({good:0,fair:1,warn:2,bad:3})[s] > ({good:0,fair:1,warn:2,bad:3})[worst]) worst=s;
+    parts.push(m.name+':'+STATUS_TEXT[s]);
+  });
+  var overall = (worst==='good')?'쾌적':(worst==='fair')?'양호':(worst==='warn')?'주의':'경고';
+  return {overall:overall, detail:parts.join(' · ')};
 }
-function buildOverall(){ $('#ovTiles').innerHTML = METRICS.map(m=>tileHTML('ov-',m)).join(''); refreshOverall(); }
 function refreshOverall(){
-  const b=overallBadge();
-  $('#overallBadge').innerHTML=`<strong>종합 평가: ${b.overall}</strong> · ${b.detail}`;
-  METRICS.forEach(m=>{
-    const st=STATE[m.key];
+  var b=overallBadge();
+  $('#overallBadge').innerHTML='<strong>종합 평가: '+b.overall+'</strong> · '+b.detail;
+  METRICS.forEach(function(m){
+    var st=STATE[m.key];
     $('#ov-'+m.key+'-val').textContent = fmt(m,st.value)+' '+m.unit;
-    const s=statusOf(m,st.value); const t=$('#ov-'+m.key+'-tag'); t.textContent=STATUS_TEXT[s]; t.className='tag '+s;
-    spark($('#ov-'+m.key+'-mini'), st.history.slice(-40).map(h=>h.v), m.range[0],m.range[1], m.color);
+    var s=statusOf(m,st.value), t=$('#ov-'+m.key+'-tag'); t.textContent=STATUS_TEXT[s]; t.className='tag '+s;
+    spark($('#ov-'+m.key+'-mini'), st.history.slice(-40).map(function(h){return h.v}), m.range[0],m.range[1], m.color);
   });
 }
 
-/* ===== 큰 차트(70%, 캔버스 + 툴팁) ===== */
-let BIG={metric:null};
+/* ── 큰 차트(툴팁 포함) ─────────────────────────────────────── */
+var BIG={metric:null};
 function openModal(key){
-  BIG.metric = METRICS.find(m=>m.key===key);
-  $('#modalTitle').textContent = `${BIG.metric.name} 시간 추이`;
+  BIG.metric = METRICS.filter(function(m){return m.key===key})[0];
+  $('#modalTitle').textContent = BIG.metric.name+' 시간 추이';
   $('#modal').classList.add('open');
   renderBig();
 }
-$('#btnClose').onclick=()=>$('#modal').classList.remove('open');
+$('#btnClose').onclick=function(){ $('#modal').classList.remove('open'); };
 
 function renderBig(){
-  const m=BIG.metric, canvas=$('#chartCanvas'), tip=$('#chartTip');
-  const hist=STATE[m.key].history, labels=hist.map(h=>new Date(h.t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})), values=hist.map(h=>h.v);
-  const resize=()=>{ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; draw(); };
-  function toXY(i,v){
-    const pad=40,w=canvas.width,h=canvas.height, x=pad+(w-pad*2)*(i/Math.max(1,values.length-1));
-    const [ymin,ymax]=m.range; const y=h-pad-((v-ymin)/(ymax-ymin))*(h-pad*2); return [x,y];
-  }
-  function draw(){
-    const ctx=canvas.getContext('2d'); const w=canvas.width,h=canvas.height,pad=40; ctx.clearRect(0,0,w,h);
-    // grid
-    ctx.strokeStyle='rgba(255,255,255,.08)'; for(let i=0;i<5;i++){ const y=pad+i*(h-pad*2)/4; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y); ctx.stroke(); }
-    // area + line
-    ctx.lineWidth=2; ctx.strokeStyle=m.color; ctx.fillStyle=m.color;
-    ctx.beginPath(); let [x0,y0]=toXY(0,values[0]); ctx.moveTo(x0,y0); for(let i=1;i<values.length;i++){ const [x,y]=toXY(i,values[i]); ctx.lineTo(x,y); }
-    ctx.lineTo(pad+(values.length-1)*( (w-pad*2)/Math.max(1,values.length-1) ), h-pad); ctx.lineTo(pad,h-pad); ctx.closePath(); ctx.globalAlpha=.18; ctx.fill(); ctx.globalAlpha=1;
-    ctx.beginPath(); ctx.moveTo(x0,y0); for(let i=1;i<values.length;i++){ const [x,y]=toXY(i,values[i]); ctx.lineTo(x,y); } ctx.stroke();
-    // axis labels
-    ctx.fillStyle='#a9c9c0'; ctx.font='12px system-ui'; ctx.fillText(labels[0]||'',pad,h-10); ctx.textAlign='right'; ctx.fillText(labels.at(-1)||'',w-pad,h-10); ctx.textAlign='left';
-  }
-  function onMove(e){
-    const r=canvas.getBoundingClientRect(), x=e.clientX-r.left, step=(canvas.width-80)/Math.max(1,values.length-1);
-    let idx=Math.round((x-40)/step); idx=Math.max(0,Math.min(values.length-1,idx));
-    const [tx,ty]=toXY(idx,values[idx]); tip.style.left=(tx+12)+'px'; tip.style.top=(ty-12)+'px';
-    tip.textContent=`${labels[idx]} · ${fmt(m,values[idx])} ${m.unit}`; tip.style.display='block';
-  }
-  function onLeave(){ tip.style.display='none'; }
-  canvas.onmousemove=onMove; canvas.onmouseleave=onLeave;
-  resize(); new ResizeObserver(resize).observe(canvas.parentElement);
+  try{
+    var m=BIG.metric, canvas=$('#chartCanvas'), tip=$('#chartTip');
+    var hist=STATE[m.key].history, labels=hist.map(function(h){var d=new Date(h.t); return (('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)); }), values=hist.map(function(h){return h.v;});
+    function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; draw(); }
+    function toXY(i,v){ var pad=40,w=canvas.width,h=canvas.height; var x=pad+(w-pad*2)*(i/Math.max(1,values.length-1)); var y=h-pad-((v-m.range[0])/(m.range[1]-m.range[0]))*(h-pad*2); return [x,y]; }
+    function draw(){
+      var ctx=canvas.getContext('2d'), w=canvas.width,h=canvas.height,pad=40; ctx.clearRect(0,0,w,h);
+      ctx.strokeStyle='rgba(255,255,255,.08)';
+      for(var i=0;i<5;i++){ var y=pad+i*(h-pad*2)/4; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y); ctx.stroke(); }
+      ctx.lineWidth=2; ctx.strokeStyle=m.color; ctx.fillStyle=m.color;
+      ctx.beginPath(); var xy=toXY(0,values[0]); ctx.moveTo(xy[0],xy[1]);
+      for(i=1;i<values.length;i++){ xy=toXY(i,values[i]); ctx.lineTo(xy[0],xy[1]); }
+      ctx.lineTo(w-pad,h-pad); ctx.lineTo(pad,h-pad); ctx.closePath(); ctx.globalAlpha=.18; ctx.fill(); ctx.globalAlpha=1;
+      ctx.beginPath(); xy=toXY(0,values[0]); ctx.moveTo(xy[0],xy[1]);
+      for(i=1;i<values.length;i++){ xy=toXY(i,values[i]); ctx.lineTo(xy[0],xy[1]); } ctx.stroke();
+      ctx.fillStyle='#a9c9c0'; ctx.font='12px system-ui'; ctx.fillText(labels[0]||'',pad,h-10); ctx.textAlign='right'; ctx.fillText(labels[labels.length-1]||'',w-pad,h-10); ctx.textAlign='left';
+    }
+    function onMove(e){
+      var r=canvas.getBoundingClientRect(), x=e.clientX-r.left, step=(canvas.width-80)/Math.max(1,values.length-1);
+      var idx=Math.round((x-40)/step); if(idx<0)idx=0; if(idx>values.length-1)idx=values.length-1;
+      var point=toXY(idx,values[idx]); tip.style.left=(point[0]+12)+'px'; tip.style.top=(point[1]-12)+'px';
+      tip.textContent=labels[idx]+' · '+fmt(m,values[idx])+' '+m.unit; tip.style.display='block';
+    }
+    function onLeave(){ tip.style.display='none'; }
+    canvas.onmousemove=onMove; canvas.onmouseleave=onLeave;
+    resize(); window.addEventListener('resize',resize);
+  }catch(e){ showErr('큰 그래프 오류: '+e.message); }
 }
 
-/* ===== 업데이트 루프 ===== */
+/* ── 루프 & 이벤트 ─────────────────────────────────────────── */
 function tick(){
-  METRICS.forEach(m=>{
-    const st=STATE[m.key], [min,max]=m.range, step=({pm10:2.2,pm25:1.5,co2:15,temp:.25,humi:1.2,lux:30,noise:1.0,wind:.15})[m.key];
-    st.value=gentle(st.value,step,min,max); st.history.push({t:Date.now(),v:st.value}); if(st.history.length>HISTORY_LEN) st.history.shift();
-  });
-  updateCards();
-  if($('#monitor').classList.contains('open')) refreshBoard();
-  if($('#overall').classList.contains('open')) refreshOverall();
-  if($('#modal').classList.contains('open')) renderBig();
+  try{
+    var stepMap={pm10:2.2,pm25:1.5,co2:15,temp:.25,humi:1.2,lux:30,noise:1.0,wind:.15};
+    METRICS.forEach(function(m){
+      var st=STATE[m.key], step=stepMap[m.key]; st.value=gentle(st.value,step,m.range[0],m.range[1]);
+      st.history.push({t:Date.now(),v:st.value}); if(st.history.length>120) st.history.shift();
+    });
+    updateCards();
+    if($('#monitor').classList.contains('open')) refreshBoard();
+    if($('#overall').classList.contains('open')) refreshOverall();
+    if($('#modal').classList.contains('open')) renderBig();
+  }catch(e){ showErr('업데이트 오류: '+e.message); }
 }
+document.getElementById('grid').addEventListener('click',function(e){ var b=e.target.closest('.btn-graph'); if(b) openModal(b.getAttribute('data-open')); });
+$('#btnMonitor').onclick=function(){ buildBoard(); $('#monitor').classList.add('open'); };
+$('#btnMonClose').onclick=function(){ $('#monitor').classList.remove('open'); };
+$('#btnOverall').onclick=function(){ buildOverall(); $('#overall').classList.add('open'); };
+$('#btnOvClose').onclick=function(){ $('#overall').classList.remove('open'); };
+$('#btnRefresh').onclick=tick;
+window.addEventListener('keydown',function(e){ if(e.key==='Escape'){ $('#modal').classList.remove('open'); $('#monitor').classList.remove('open'); $('#overall').classList.remove('open'); }});
 
-/* ===== 이벤트 ===== */
-$('#grid').addEventListener('click',e=>{ const b=e.target.closest('.btn-graph'); if(b) openModal(b.dataset.open); });
-$('#btnMonitor').onclick=()=>{ buildBoard(); $('#monitor').classList.add('open'); };
-$('#btnMonClose').onclick=()=>$('#monitor').classList.remove('open');
-$('#btnOverall').onclick=()=>{ buildOverall(); $('#overall').classList.add('open'); };
-$('#btnOvClose').onclick=()=>$('#overall').classList.remove('open');
-$('#btnRefresh').onclick=()=>tick();
-window.addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('#modal').classList.remove('open'); $('#monitor').classList.remove('open'); $('#overall').classList.remove('open'); } });
-
-/* ===== 시작 ===== */
-seed();
-updateCards();
-setInterval(tick, UPDATE_MS);
-
-/* 푸터 로고(같은 폴더에 logo_white.png가 있으면 자동 표시) */
-(function(){
-  const img=$('#footerLogo');
-  img.src='logo_white.png'; // 같은 폴더의 파일명
-})();
+/* ── 시작 ──────────────────────────────────────────────────── */
+try{
+  seed(); updateCards(); setInterval(tick,30000);
+  // 로고 자동(같은 폴더에 있으면 표시)
+  $('#footerLogo').src='logo_white.png';
+}catch(e){ showErr('초기화 실패: '+e.message); }
 </script>
 </body>
 </html>
