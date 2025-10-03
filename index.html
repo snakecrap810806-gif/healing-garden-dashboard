@@ -63,9 +63,9 @@ body{ margin:0; font-family:'Pretendard',system-ui,-apple-system,Segoe UI,Roboto
 .card__unit{color:var(--muted);font-size:14px;margin-left:6px}
 .card__hint{color:var(--muted);font-size:12px;margin:4px 0 6px;opacity:.9}
 
-/* ⭐ 스파크라인 고정 영역: 흘러내림(canvas 높이가 커지는 문제) 방지 핵심 수정 */
+/* ⭐ 스파크라인 고정 영역: 흘러내림(canvas 높이가 커지는 문제) 방지 최종 수정 */
 .spark-wrap{height:56px;overflow:hidden; position: relative;} /* 높이 고정 */
-.spark{height:100%; width:100%; display:block; **max-height: 100%; min-height: 100%;** } /* 캔버스 높이 강제 고정 */
+.spark{height:100% !important; width:100%; display:block; max-height: 100% !important; min-height: 100% !important; } /* 캔버스 높이 강제 고정 */
 
 /* 그래프 버튼 동작 확인 */
 .btn-graph{position:absolute;right:12px;bottom:12px;z-index:2;display:inline-flex;gap:6px;align-items:center;
@@ -190,9 +190,9 @@ Chart.defaults.plugins.tooltip.titleColor = '#07241b';
 Chart.defaults.plugins.tooltip.bodyColor  = '#07241b';
 Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(191,234,216,.96)';
 
-/* ⭐ 스파크라인 설정 최적화: 높이 고정을 위해 maintainAspectRatio를 false로, aspectRatio를 null로 설정 */
+/* 스파크라인 설정 최적화: 높이 고정을 위해 maintainAspectRatio:false, aspectRatio:null 설정 */
 const sparkOptions = {
-  responsive:true, **maintainAspectRatio:false, aspectRatio:null,** /* 높이 56px 고정 */
+  responsive:true, maintainAspectRatio:false, aspectRatio:null, /* 높이 56px 고정 */
   resizeDelay:0,
   animation:false,
   plugins:{ legend:{display:false}, tooltip:{enabled:true, mode:'index', intersect:false} },
@@ -230,141 +230,4 @@ function initCards(){
         <span class="badge" id="badge-${it.key}">-</span>
       </div>
       <div>
-        <span class="card__value" id="val-${it.key}">-</span><span class="card__unit">${it.unit}</span>
-        <div class="card__hint">최근 추이</div>
-        <div class="spark-wrap">
-          <canvas class="spark" id="spark-${it.key}"></canvas>
-        </div>
-      </div>
-      <button class="btn-graph" data-open="${it.key}">그래프</button>
-    `;
-    frag.appendChild(card);
-  });
-  dom.grid.appendChild(frag);
-
-  ITEMS.forEach(it=>{
-    const ctx = document.getElementById(`spark-${it.key}`).getContext('2d');
-    sparkCharts[it.key] = new Chart(ctx, {
-      type:'line',
-      data:{ labels: [], datasets:[{ data:[], borderColor:it.color, backgroundColor:'transparent' }]},
-      options: sparkOptions
-    });
-  });
-
-  // 카드별 '그래프' 버튼 동작 확인
-  document.querySelectorAll('.btn-graph').forEach(btn=>{
-    btn.addEventListener('click', ()=> openDetailChart(btn.dataset.open));
-  });
-}
-
-function updateCard(key,val){
-  document.getElementById(`val-${key}`).textContent = val;
-  const s = statusOf(key, Number(val));
-  const badge = document.getElementById(`badge-${key}`);
-  badge.textContent = s;
-  badge.className = `badge ${badgeClass(s)}`;
-}
-function updateSpark(key){
-  const chart = sparkCharts[key];
-  const arr = historyMap[key] || [];
-  chart.data.labels = arr.map(d=>d.t);
-  chart.data.datasets[0].data = arr.map(d=>d.v);
-  chart.update('none'); // 미세 변화 유지를 위해 'none' 옵션을 사용하여 애니메이션 없이 업데이트
-}
-
-/* 데이터(데모) */
-function pushHistory(key,t,v){
-  if (!historyMap[key]) historyMap[key]=[];
-  historyMap[key].push({t,v});
-  if (historyMap[key].length>300) historyMap[key].shift();
-}
-function randomInit(){
-  const now=Date.now();
-  ITEMS.forEach((it,i)=>{
-    let base = { pm10:25, pm25:12, co2:520, temp:18.7, hum:55, lux:420, noise:52, wind:1.2 }[it.key];
-    for(let j=59;j>=0;j--){
-      const t = new Date(now - j*30*1000);
-      const v = Number((base + Math.sin((60-j)/10 + i) * (it.key==='co2'? 8: it.key==='temp'? .7 : (it.key==='hum'? 2: 1)) + (Math.random()*2-1)).toFixed(it.key==='temp'?1:0));
-      pushHistory(it.key, t, v);
-    }
-  });
-}
-function tickOnce(){
-  ITEMS.forEach(it=>{
-    const last = historyMap[it.key]?.at(-1)?.v ?? 0;
-    const noise = ({ pm10:.9, pm25:.7, co2:5.5, temp:.3, hum:1, lux:16, noise:.7, wind:.25 })[it.key] || 1;
-    const v = Number((last + (Math.random()*2-1)*noise).toFixed(it.key==='temp'?1:0));
-    pushHistory(it.key, new Date(), v);
-    updateCard(it.key, v); updateSpark(it.key);
-  });
-  dom.timeNote.textContent = new Date().toLocaleString() + ' 기준 · 30초 간격 업데이트';
-}
-function refreshNow(){ tickOnce() }
-
-/* 상세 모달 차트: 모달 차트 안정적으로 보이도록 */
-function openDetailChart(key){
-  const meta = ITEMS.find(i=>i.key===key);
-  const series = (historyMap[key]||[]).slice(-240); // 최근 2시간 (4시간으로 보이면 더 좋음)
-  const labels = series.map(d=>d.t);
-  const data   = series.map(d=>d.v);
-  const min = Math.min(...data), max=Math.max(...data);
-  const pad = (max-min)*.15 || 1;
-
-  dom.chartTitle.textContent = `${meta.label} 상세 추이 (${meta.unit})`;
-  const ctx = dom.detailCanvas.getContext('2d');
-  if (detailChart) detailChart.destroy();
-  detailChart = new Chart(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{ label:meta.label, data, borderColor:meta.color, backgroundColor:'transparent', pointRadius:2, tension:.28 }]},
-    options:{
-      responsive:true, maintainAspectRatio:false, /* 모달 크기에 따라 유동적으로 크기 조절 */
-      interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ type:'time', time:{ unit:'minute', tooltipFormat:'yyyy-MM-dd HH:mm:ss' },
-            grid:{ color:getCss('--chart-grid') }, ticks:{ color:getCss('--chart-text') } },
-        y:{ suggestedMin:min-pad, suggestedMax:max+pad,
-            grid:{ color:getCss('--chart-grid') }, ticks:{ color:getCss('--chart-axis') } }
-      }
-    }
-  });
-  dom.chartModal.classList.add('is-open'); dom.chartModal.setAttribute('aria-hidden','false');
-}
-function closeChart(){ dom.chartModal.classList.remove('is-open'); dom.chartModal.setAttribute('aria-hidden','true') }
-
-/* 종합 평가 모달 동작 확인 */
-function openEval(){
-  dom.evalWrap.innerHTML=''; let good=0;
-  ITEMS.forEach(it=>{
-    const last = historyMap[it.key]?.at(-1)?.v ?? '-';
-    const s = statusOf(it.key, Number(last)); if(s==='좋음') good++;
-    const el = document.createElement('div'); el.className='eval-card';
-    el.innerHTML = `
-      <div class="bullet" style="background:${it.color};box-shadow:0 0 0 3px ${it.color}30"></div>
-      <div class="eval-card__title">${it.label}</div>
-      <span class="badge ${badgeClass(s)}" style="margin-left:8px">${s}</span>
-      <div class="eval-card__score">${last} <span style="color:var(--muted);font-size:12px">${it.unit}</span></div>`;
-    dom.evalWrap.appendChild(el);
-  });
-  const grade = good>=7?'매우 양호': good>=5?'양호': good>=3?'보통':'주의';
-  const color = grade.includes('주의')?'var(--bad)': grade.includes('매우')?'var(--good)':'var(--ok)';
-  dom.evalOverall.innerHTML = `종합 평가 : <span style="color:${color}">${grade}</span> · (좋음 ${good}/8)`;
-  dom.evalModal.classList.add('is-open'); dom.evalModal.setAttribute('aria-hidden','false');
-}
-function closeEval(){ dom.evalModal.classList.remove('is-open'); dom.evalModal.setAttribute('aria-hidden','true') }
-
-/* 초기화 및 이벤트 리스너 */
-initCards(); randomInit(); tickOnce();
-// 30초 간격의 미세 변화 유지
-setInterval(tickOnce, 30*1000);
-
-dom.btnRefresh.addEventListener('click', refreshNow);
-dom.chartClose.addEventListener('click', closeChart);
-dom.chartModal.addEventListener('click', e=>{ if(e.target===dom.chartModal) closeChart() });
-dom.btnViewEval.addEventListener('click', openEval);
-dom.evalClose.addEventListener('click', closeEval);
-dom.evalModal.addEventListener('click', e=>{ if(e.target===dom.evalModal) closeEval() });
-dom.btnViewMon.addEventListener('click', ()=>{ closeEval(); closeChart(); window.scrollTo({top:0,behavior:'smooth'}) });
-</script>
-</body>
-</html>
+        <span class="card__value" id="val-${it.key}">-</span><span class="card__
